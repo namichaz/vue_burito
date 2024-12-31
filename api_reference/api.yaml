@@ -1,0 +1,121 @@
+openapi: 3.0.0
+info:
+  title: 店舗検索 API
+  version: 1.0.0
+  description: 登録されてる店舗情報の取得、新規登録をする。
+paths:
+  /shops:
+    get:
+      summary: 全ての店舗情報を取得
+      description: 登録されてるブリトー屋さんの店舗情報を取得する。
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              example:
+                shop_id: 1
+                shop_name: Elsocalo Burito
+                location: { type: Point, coordinates: [139.6917, 35.6895] }
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Bad Request
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Not Found
+        "408":
+          description: Request Timeout
+          content:
+            application/json:
+              example:
+                code: 408
+                message: Request Timeout
+        "500":
+          description: Error
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Error
+    post:
+      summary: Create a new user
+      description: Creates a new user record.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              name: New User
+      responses:
+        "201":
+          description: User created successfully
+  /shops/info/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    get:
+      summary: Get a user by ID
+      description: Retrieves a user record by ID.
+      responses:
+        "200":
+          description: The user record
+          content:
+            application/json:
+              example:
+                id: 1
+                name: John Doe
+    put:
+      summary: Update a user by ID
+      description: Updates a user record by ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              name: Updated User
+      responses:
+        "200":
+          description: User updated successfully
+    delete:
+      summary: Delete a user by ID
+      description: Deletes a user record by ID.
+      responses:
+        "204":
+          description: User deleted successfully
+  /shops/ranking:
+    get:
+      summary: Get a list of users
+      description: Retrieves a list of user records.
+      responses:
+        "200":
+          description: A list of user records
+          content:
+            application/json:
+              example:
+                - id: 1
+                  name: John Doe
+                - id: 2
+                  name: Jane Smith
+    post:
+      summary: Create a new user
+      description: Creates a new user record.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              name: New User
+      responses:
+        "201":
+          description: User created successfully
