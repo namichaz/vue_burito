@@ -1,10 +1,11 @@
 <template>
   <p>{{ text }}</p>
   <v-btn @click="submit" variant="outlined"> Button </v-btn>
-  <ul v-for="user in users">
+  <!-- <ul v-for="user in users">
     <li>{{ user.name }}</li>
     <li>{{ user.email }}</li>
-  </ul>
+  </ul> -->
+  <hello />
 </template>
 
 <script setup lang="ts">
@@ -15,7 +16,6 @@ const submit = () => {
   text.value = "text2";
 };
 </script>
-
 <style lang="scss" scope>
 v-btn {
   border: solid 1px;
