@@ -1,19 +1,14 @@
 <template>
-  <p>{{ text }}</p>
-  <v-btn @click="submit" variant="outlined"> Button </v-btn>
-  <!-- <ul v-for="user in users">
-    <li>{{ user.name }}</li>
-    <li>{{ user.email }}</li>
-  </ul> -->
-  <hello />
+  <v-btn @click="goToGoogleMap" variant="outlined"> Button </v-btn>
+  <router-view></router-view>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { useRouter } from "vue-router";
 
-const text = ref("");
-const submit = () => {
-  text.value = "text2";
+const router = useRouter();
+const goToGoogleMap = () => {
+  router.push("/gmap");
 };
 </script>
 <style lang="scss" scope>

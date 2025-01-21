@@ -1,11 +1,11 @@
 // src/router.ts
 import { createRouter, createWebHistory } from "vue-router";
 import App from "@/presentation/views/App.vue";
-import hello from "@/components/HelloWorld.vue";
+import Gmap from "@/presentation/views/GoogleMap.vue";
 
 const routes = [
   { path: "/", component: App },
-  { path: "/hello", component: hello },
+  { path: "/gmap", component: Gmap },
 ];
 
 const router = createRouter({
