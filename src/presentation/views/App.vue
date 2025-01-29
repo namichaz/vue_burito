@@ -1,23 +1,55 @@
 <template>
-  <v-btn @click="goToGoogleMap" variant="outlined"> Button </v-btn>
-  <router-view></router-view>
+  <header></header>
+  <main>
+    <router-view></router-view>
+  </main>
+  <footer>
+    <nav>
+      <ul>
+        <li @click="toOtherPage('')">
+          <img :src="home" alt="" />
+        </li>
+        <li @click="toOtherPage('search')">
+          <img :src="search" alt="" />
+        </li>
+        <li>
+          <img :src="chart" alt="" />
+        </li>
+        <li>
+          <img :src="plus" alt="" />
+        </li>
+      </ul>
+    </nav>
+  </footer>
 </template>
 
 <script setup lang="ts">
+import chart from "@/assets/chart.png";
+import home from "@/assets/home.png";
+import search from "@/assets/search.png";
+import plus from "@/assets/plus.png";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const goToGoogleMap = () => {
-  router.push("/gmap");
+
+const toOtherPage = (pageName: string) => {
+  router.push(`/${pageName}`);
 };
 </script>
 <style lang="scss" scope>
-v-btn {
-  border: solid 1px;
-  padding: 5px;
-  &:hover {
-    opacity: 0.5;
-    cursor: pointer;
+footer {
+  width: 100%;
+  ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    column-gap: 3rem;
+    li {
+      &:hover {
+        opacity: 0.5;
+        cursor: pointer;
+      }
+    }
   }
 }
 </style>

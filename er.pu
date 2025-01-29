@@ -24,8 +24,6 @@ rectangle 住所 #lightgreen {
     * city : varchar(100)
     * street : varchar(100)
   }
-
-
 }
 
 rectangle 評価 #LightCoral{
