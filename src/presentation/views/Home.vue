@@ -1,5 +1,7 @@
 <template>
-  <v-btn @click="goToGoogleMap" variant="outlined"> Button </v-btn>
+  <div id="home">
+    <v-btn @click="goToGoogleMap" variant="outlined"> Button </v-btn>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -11,6 +13,9 @@ const goToGoogleMap = () => {
 };
 </script>
 <style lang="scss" scope>
+#home {
+  padding: 20px;
+}
 v-btn {
   border: solid 1px;
   padding: 5px;

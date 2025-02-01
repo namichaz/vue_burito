@@ -1,7 +1,5 @@
 <template>
   <div>
-    <h1>Google Maps in Vue (Vite)</h1>
-    <!-- 検索用テキストボックス -->
     <div>
       <input
         v-model="searchQuery"
