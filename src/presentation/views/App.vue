@@ -52,10 +52,10 @@
 </template>
 
 <script setup lang="ts">
-import chart from "@/assets/chart.png";
-import home from "@/assets/home.png";
-import search from "@/assets/search.png";
-import plus from "@/assets/plus.png";
+import chart from "@/presentation/assets/chart.png";
+import home from "@/presentation/assets/home.png";
+import search from "@/presentation/assets/search.png";
+import plus from "@/presentation/assets/plus.png";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
