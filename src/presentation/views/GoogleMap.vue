@@ -1,31 +1,26 @@
 <template>
-  <div>
-    <div>
-      <input
-        v-model="searchQuery"
-        @keyup.enter="searchPlaces"
-        type="text"
-        placeholder="検索したいキーワードを入力"
-        style="width: 300px; padding: 5px; margin-bottom: 10px"
-      />
-      <button @click="searchPlaces">検索</button>
-    </div>
-
-    <!-- 地図を表示するための div -->
-    <div id="map" style="width: 1000px; height: 1000px"></div>
-
-    <!-- 現在地の緯度・経度を表示 -->
-    <div v-if="lat && lng">
-      <p>現在地の緯度: {{ lat }}</p>
-      <p>現在地の経度: {{ lng }}</p>
-    </div>
-
-    <!-- クリックした位置の緯度・経度を表示 -->
-    <div v-if="clickedLat && clickedLng">
-      <p>選択した位置の緯度: {{ clickedLat }}</p>
-      <p>選択した位置の経度: {{ clickedLng }}</p>
-    </div>
-  </div>
+  <v-main>
+    <v-row>
+      <v-card class="mx-auto" color="surface-light" max-width="100%">
+        <v-card-text>
+          <v-text-field
+            :loading="loading"
+            append-inner-icon="mdi-magnify"
+            density="compact"
+            label="Search templates"
+            variant="solo"
+            hide-details
+            single-line
+            @click:append-inner="searchPlaces"
+          ></v-text-field>
+        </v-card-text>
+      </v-card>
+      hello
+    </v-row>
+    <v-row>
+      <div id="map" style="width: 100%; height: 100vh"></div>
+    </v-row>
+  </v-main>
 </template>
 
 <script>
@@ -63,8 +58,8 @@ export default {
 
     // 地図クリック時のイベントリスナー
     this.map.addListener("click", (event) => {
-      const clickedLat = event.latLng.lat();
-      const clickedLng = event.latLng.lng();
+      const clickedLat = event.latLng.lat(); //選択した位置の緯度
+      const clickedLng = event.latLng.lng(); //選択した位置の経度
 
       // クリックした位置にマーカーを追加
       new google.maps.Marker({

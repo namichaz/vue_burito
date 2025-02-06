@@ -4,12 +4,7 @@
     <div v-if="shopList.length > 0">
       <ul>
         <li v-for="(shop, index) in shopList" :key="index">
-          <p>Shop ID: {{ shop.shop_id }}</p>
           <p>Shop Name: {{ shop.shop_name }}</p>
-          <p>
-            Location: {{ shop.location.coordinates[0] }},
-            {{ shop.location.coordinates[1] }}
-          </p>
         </li>
       </ul>
     </div>
@@ -29,6 +24,7 @@ const shopList = ref<Shop[]>([]);
 
 const getShopInfo = async () => {
   const shopInfo = await shopListTransfer.getShopList();
+  console.log("shopInfo:", shopInfo);
   shopList.value = shopInfo;
 };
 </script>

@@ -1,61 +1,60 @@
 <template>
-  <header>
-    <!-- <div>
-      <span>Where is my best burito!!</span>
-    </div> -->
-    <div class="loop-wrap">
-      <ul class="loop-area">
-        <li class="content">Where is my best burrito!?</li>
-        <li class="content">Where is my best burrito!?</li>
-        <li class="content">Where is my best burrito!?</li>
-        <li class="content">Where is my best burrito!?</li>
-      </ul>
-      <ul class="loop-area">
-        <li class="content">Where is my best burrito!?</li>
-        <li class="content">Where is my best burrito!?</li>
-        <li class="content">Where is my best burrito!?</li>
-        <li class="content">Where is my best burrito!?</li>
-      </ul>
-      <ul class="loop-area">
-        <li class="content">Where is my best burrito!?</li>
-        <li class="content">Where is my best burrito!?</li>
-        <li class="content">Where is my best burrito!?</li>
-        <li class="content">Where is my best burrito!?</li>
-      </ul>
-    </div>
-  </header>
-  <main>
-    <router-view></router-view>
-  </main>
-  <footer>
-    <nav>
-      <ul>
-        <li @click="toOtherPage('')">
-          <img :src="home" alt="" />
-          <p>Home</p>
-        </li>
-        <li @click="toOtherPage('search')">
-          <img :src="search" alt="" />
-          <p>Search</p>
-        </li>
-        <li>
-          <img :src="chart" alt="" />
-          <p>Rank</p>
-        </li>
-        <li>
-          <img :src="plus" alt="" />
-          <p>Post</p>
-        </li>
-      </ul>
-    </nav>
-  </footer>
+  <div>
+    <header>
+      <div class="loop-wrap">
+        <ul class="loop-area">
+          <li class="content">Where's my best burrito!?</li>
+          <li class="content">Where's my best burrito!?</li>
+          <li class="content">Where's my best burrito!?</li>
+          <li class="content">Where's my best burrito!?</li>
+        </ul>
+        <ul class="loop-area">
+          <li class="content">Where's my best burrito!?</li>
+          <li class="content">Where's my best burrito!?</li>
+          <li class="content">Where's my best burrito!?</li>
+          <li class="content">Where's my best burrito!?</li>
+        </ul>
+        <ul class="loop-area">
+          <li class="content">Where's my best burrito!?</li>
+          <li class="content">Where's my best burrito!?</li>
+          <li class="content">Where's my best burrito!?</li>
+          <li class="content">Where's my best burrito!?</li>
+        </ul>
+      </div>
+    </header>
+    <main>
+      <router-view></router-view>
+    </main>
+    <footer>
+      <nav>
+        <ul>
+          <li @click="toOtherPage('')">
+            <img :src="home" alt="" />
+            <p>Home</p>
+          </li>
+          <li @click="toOtherPage('search')">
+            <img :src="search" alt="" />
+            <p>Search</p>
+          </li>
+          <li>
+            <img :src="chart" alt="" />
+            <p>Rank</p>
+          </li>
+          <li>
+            <img :src="plus" alt="" />
+            <p>Post</p>
+          </li>
+        </ul>
+      </nav>
+    </footer>
+  </div>
 </template>
 
 <script setup lang="ts">
-import chart from "@/presentation/assets/chart.png";
-import home from "@/presentation/assets/home.png";
-import search from "@/presentation/assets/search.png";
-import plus from "@/presentation/assets/plus.png";
+import chart from "@/presentation/assets/chart.svg";
+import home from "@/presentation/assets/home.svg";
+import search from "@/presentation/assets/search.svg";
+import plus from "@/presentation/assets/plus.svg";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -70,6 +69,9 @@ header {
   background-color: #773a00;
   font-size: 30px;
   color: black;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 .loop-wrap {
   display: flex;
@@ -96,11 +98,13 @@ header {
   }
 }
 main {
-  height: calc(100vh - 120px);
+  /* height: calc(100vh - 120px); */
+  height: 100vh;
   background-color: #569cdb;
+  /* background-color: red; */
 }
 footer {
-  position: absolute;
+  position: sticky;
   bottom: 0;
   width: 100%;
   height: 60px;

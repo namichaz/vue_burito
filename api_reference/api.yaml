@@ -14,9 +14,10 @@ paths:
           content:
             application/json:
               example:
-                shop_id: 1
-                shop_name: Elsocalo Burito
-                location: { type: Point, coordinates: [139.6917, 35.6895] }
+                shopList:
+                  shop_id: 1
+                  shop_name: Elsocalo Burito
+                  location: { type: Point, coordinates: [139.6917, 35.6895] }
         "400":
           description: Bad Request
           content:

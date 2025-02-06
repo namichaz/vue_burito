@@ -11,4 +11,8 @@ export default defineConfig({
   },
   base: "./",
   plugins: [vue()],
+  server: {
+    host: "0.0.0.0", // これを追加
+    port: 5173, // 必要に応じてポート番号を変更
+  },
 });
