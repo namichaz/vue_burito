@@ -17,28 +17,34 @@ rectangle お店 #LightBlue {
 
 rectangle 住所 #lightgreen {
   entity "address" as address {
-    + shop_id<<FK>>
+    + shop_id: int <<FK>>
     --
-    * postcode : int
     * prefecture : varchar(100)
     * city : varchar(100)
     * street : varchar(100)
   }
 }
 
-rectangle 評価 #LightCoral{
-  entity "evaluation" as evaluation {
-    + evaluation_id : serial
-    + shop_id : <<FK>>
+rectangle お店のメニュー #LightCoral{
+  entity "shops_menu" as shops_menu {
+    + shop_id : int <<PK>><<FK>>
+    + menu_id : int <<PK>><<FK>>
     --
-    * evaluation_number : int
-    * comment : varchar(1000)
+  }
+}
+
+rectangle メニュー #LightCoral{
+  entity "menu" as menu {
+    + menu_id : serial <<PK>>
+    --
+    + menu_name : varchar(100) <<UNIQUE>> <<NOT NULL>>
   }
 }
 
 
 
 shops ||--|| address
-shops ||--o{ evaluation
+shops ||--|{ shops_menu
+shops_menu }|--|| menu
 
 @enduml

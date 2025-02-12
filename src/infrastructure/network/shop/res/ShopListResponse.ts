@@ -1,5 +1,5 @@
-import { Shop } from "./Shop";
+import ShopInfo from "@/domain/model/shop/ShopInfo";
 
 export interface ShopListResponse {
-  shopList: Shop[];
+  shopList: ShopInfo[];
 }

@@ -1,0 +1,52 @@
+:root {
+  font-family: "M PLUS Rounded 1c", serif;
+  font-style: normal;
+  color: white !important;
+}
+
+html,
+body {
+  width: 100%; /* 画面幅に合わせる */
+  height: 100vh; /* 画面高さに合わせる */
+  min-height: 100%;
+}
+
+#app {
+  height: 100vh;
+  position: relative;
+  text-align: center;
+}
+h1 {
+  font-size: 2rem !important;
+  font-weight: bold !important;
+}
+h2 {
+  font-size: 1.5rem !important;
+  font-weight: bold !important;
+}
+h3 {
+  font-size: 1rem !important;
+  font-weight: bold !important;
+}
+
+.el-message-box,
+.el-notification {
+  max-width: 90%;
+}
+
+.el-message-box .alertMessage {
+  color: #ff0000;
+  font-size: 0.875rem;
+}
+
+.el-notification__content p {
+  text-align: left;
+}
+
+.ie .el-icon-close:before {
+  content: "×";
+}
+
+.el-notification__title {
+  word-break: break-all;
+}

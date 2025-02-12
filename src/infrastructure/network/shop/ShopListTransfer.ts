@@ -1,11 +1,11 @@
-import HttpStatus from "@/domain/model/network/http/HttpStatus.ts";
-import { axios } from "@/infrastructure/network/AxiosInstance.ts";
-import Shop from "../../../domain/model/shop/Shop";
-import { ShopListResponse } from "./res/ShopListResponse";
+import HttpStatus from "@/domain/model/network/http/HttpStatus";
+import { axios } from "@/infrastructure/network/AxiosInstance";
+import { ShopListResponse } from "@/infrastructure/network/shop/res/ShopListResponse";
+import ShopInfo from "@/domain/model/shop/ShopInfo";
 
 export default class ShopListTransfer {
-  public async getShopList(): Promise<Shop[]> {
-    let shopList: Shop[] = new Array(Shop.empty());
+  public async getShopList(): Promise<ShopInfo[]> {
+    let shopList: ShopInfo[] = new Array(ShopInfo.empty());
     try {
       const response = await axios
         .get("/info/shops")
@@ -15,15 +15,15 @@ export default class ShopListTransfer {
       if (statusCode.isSuccess() && response.data) {
         const shopListResponse: ShopListResponse = response.data;
         shopList = shopListResponse.shopList.map((shop) =>
-          Shop.of(shop.shop_id, shop.shop_name, shop.latitude, shop.longitude)
+          ShopInfo.of(shop.shop, shop.address, shop.menuItem)
         );
       } else if (statusCode.isError()) {
         console.error("shoplist is not an array or not found");
-        shopList = new Array(Shop.empty());
+        shopList = new Array(ShopInfo.empty());
       }
     } catch (error) {
       console.error("Error fetching shop list:", error);
-      shopList = new Array(Shop.empty());
+      shopList = new Array(ShopInfo.empty());
     } finally {
       return shopList;
     }

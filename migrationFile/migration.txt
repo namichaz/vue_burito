@@ -1,0 +1,147 @@
+#menuテーブル=======================================
+CREATE TABLE test.menu (
+    menu_id serial PRIMARY KEY,
+    menu_name varchar(100) NOT NULL UNIQUE
+);
+
+#menuのinsert
+ INSERT INTO test.menu (menu_name) 
+VALUES 
+  ('nachos'),
+  ('burrito'),
+  ('tacos'),
+  ('tortilla'),
+  ('enchiladas'),
+  ('guacamole');
+  =================================================
+
+
+#shopsテーブル=======================================
+    最初にやること
+        CREATE EXTENSION IF NOT EXISTS postgis;
+    注意）これがないとgeometory扱えない。
+
+  CREATE TABLE test.shops (
+    shop_id   SERIAL PRIMARY KEY,
+    shop_name VARCHAR(100),
+    location  geometry(Point, 4326)
+);
+
+#INSERT
+INSERT INTO test.shops (shop_name, location)
+VALUES ('Shop Name', ST_SetSRID(ST_MakePoint(longitude, latitude), 4326));
+
+#SELECT文
+SELECT shop_id, shop_name, 
+       ST_X(location) AS longitude, 
+       ST_Y(location) AS latitude
+FROM test.shops;
+
+
+SELECT結果
+ shop_id | shop_name | longitude | latitude 
+---------+-----------+-----------+----------
+       1 | Shop A    |  139.6917 |  35.6895
+       2 | Shop B    |  137.7261 |  35.3606
+
+ =================================================
+
+
+#shops_menuテーブル=======================================
+
+CREATE TABLE test.shops_menu (
+    shop_id  INTEGER NOT NULL,
+    menu_id  INTEGER NOT NULL,
+    PRIMARY KEY (shop_id, menu_id),
+    FOREIGN KEY (shop_id) REFERENCES test.shops(shop_id) ON DELETE CASCADE,
+    FOREIGN KEY (menu_id) REFERENCES test.menu(menu_id) ON DELETE CASCADE
+);
+
+#INSERT
+INSERT INTO test.shops_menu (shop_id, menu_id)
+VALUES
+    (1, 2),
+    (1, 6);
+
+
+#menu名取得する時
+SELECT m.menu_name
+FROM test.shops_menu sm
+JOIN test.menu m ON sm.menu_id = m.menu_id
+WHERE sm.shop_id = 1;
+
+ =================================================
+
+
+#addressテーブル=======================================
+CREATE TABLE test.address (
+    shop_id   INTEGER PRIMARY KEY,
+    prefecture VARCHAR(100),
+    city       VARCHAR(100),
+    street     VARCHAR(100),
+    FOREIGN KEY (shop_id) REFERENCES test.shops(shop_id) ON DELETE CASCADE
+);
+
+#INSERT
+INSERT INTO test.address (shop_id, prefecture, city, street)
+VALUES (1, '大阪府', '大阪市北区', '豊崎３丁目１９−３');
+
+
+#SELECT文
+SELECT a.prefecture, a.city, a.street
+FROM test.address a
+WHERE a.shop_id = 1;
+
+ =================================================
+
+
+
+select
+    s.shop_id,s.shop_name,
+    ST_X(s.location) AS longitude,
+    ST_Y(location) AS latitude,a.prefecture,
+    a.city,a.street
+from test.shops s
+inner join test.address a
+on s.shop_id = a.shop_id
+where s.shop_id = 1;
+
+結果
+ shop_id | shop_name | longitude | latitude | prefecture |    city    |      street
+---------+-----------+-----------+----------+------------+------------+-------------------
+       1 | Shop A    |  139.6917 |  35.6895 | 大阪府     | 大阪市北区 | 豊崎３丁目１９−３
+
+
+
+
+#menu名取得する時
+SELECT STRING_AGG(menu_name, ',') AS menu_list
+FROM test.menu
+JOIN test.shops_menu ON test.menu.menu_id = test.shops_menu.menu_id
+WHERE test.shops_menu.shop_id = 1;
+       menu_list
+------------------------
+ nachos,tacos,guacamole
+
+
+
+#select完成系
+SELECT
+    s.shop_id,
+    s.shop_name,
+    ST_X(s.location) AS longitude,
+    ST_Y(s.location) AS latitude,
+    a.prefecture,
+    a.city,
+    a.street,
+    STRING_AGG(m.menu_name, ',') AS menu_list
+FROM test.shops s
+INNER JOIN test.address a ON s.shop_id = a.shop_id
+INNER JOIN test.shops_menu sm ON s.shop_id = sm.shop_id
+INNER JOIN test.menu m ON sm.menu_id = m.menu_id
+GROUP BY s.shop_id, s.shop_name, s.location, a.prefecture, a.city, a.street;
+
+結果
+ shop_id | shop_name | longitude | latitude | prefecture |    city    |      street       |       menu_list
+---------+-----------+-----------+----------+------------+------------+-------------------+------------------------
+       1 | Shop A    |  139.6917 |  35.6895 | 大阪府     | 大阪市北区 | 豊崎３丁目１９−３ | nachos,tacos,guacamole

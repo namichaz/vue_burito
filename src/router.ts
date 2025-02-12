@@ -1,13 +1,15 @@
 // src/router.ts
 import { createRouter, createWebHistory } from "vue-router";
-import Home from "@/presentation/views/Home.vue";
-import Search from "@/presentation/views/GoogleMap.vue";
+import Search from "@/presentation/views/Search.vue";
 import Howto from "@/presentation/views/Howto.vue";
+import Post from "@/presentation/views/Post.vue";
+import List from "@/presentation/views/List.vue";
 
 const routes = [
   { path: "/", component: Howto },
-  { path: "/home", component: Home },
   { path: "/search", component: Search },
+  { path: "/post", component: Post },
+  { path: "/list", component: List },
 ];
 
 const router = createRouter({

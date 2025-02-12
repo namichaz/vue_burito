@@ -1,4 +1,9 @@
 export default class Shop {
+  static shop_id: number;
+  static shop_name: string;
+  static latitude: number;
+  static longitude: number;
+
   public static of(
     shop_id: number,
     shop_name: string,
