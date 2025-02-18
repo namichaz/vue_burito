@@ -1,10 +1,10 @@
 export enum MenuItem {
-  ナチョス = "nachos",
-  ブリトー = "burrito",
-  タコス = "tacos",
-  トルティーヤ = "tortilla",
-  エンチラーダ = "enchiladas",
-  ワカモレ = "guacamole",
+  nachos = "nachos",
+  burrito = "burrito",
+  tacos = "tacos",
+  tortilla = "tortilla",
+  enchiladas = "enchiladas",
+  guacamole = "guacamole",
 }
 
 // label と value のセットを配列として返す
@@ -13,4 +13,8 @@ export const getMenuItems = () => {
     label: key,
     value: MenuItem[key as keyof typeof MenuItem],
   }));
+};
+
+export const getStringMenuItems = (): string[] => {
+  return Object.values(MenuItem); // これで値の配列を取得
 };

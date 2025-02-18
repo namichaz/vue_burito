@@ -1,11 +1,11 @@
-#menuテーブル=======================================
-CREATE TABLE test.menu (
+#mst_menuテーブル=======================================
+CREATE TABLE stage.mst_menu (
     menu_id serial PRIMARY KEY,
     menu_name varchar(100) NOT NULL UNIQUE
 );
 
 #menuのinsert
- INSERT INTO test.menu (menu_name) 
+ INSERT INTO stage.mst_menu (menu_name) 
 VALUES 
   ('nachos'),
   ('burrito'),
@@ -19,23 +19,20 @@ VALUES
 #shopsテーブル=======================================
     最初にやること
         CREATE EXTENSION IF NOT EXISTS postgis;
-    注意）これがないとgeometory扱えない。
+    注意）これがないとgeometory扱えない。DBに対して1回実行が必要で、スキーマ毎ではない。
 
-  CREATE TABLE test.shops (
+  CREATE TABLE stage.shops (
     shop_id   SERIAL PRIMARY KEY,
     shop_name VARCHAR(100),
-    location  geometry(Point, 4326)
 );
 
 #INSERT
-INSERT INTO test.shops (shop_name, location)
-VALUES ('Shop Name', ST_SetSRID(ST_MakePoint(longitude, latitude), 4326));
+INSERT INTO stage.shops (shop_name, location)
+VALUES ('Shop Name');
 
 #SELECT文
 SELECT shop_id, shop_name, 
-       ST_X(location) AS longitude, 
-       ST_Y(location) AS latitude
-FROM test.shops;
+FROM stage.shops;
 
 
 SELECT結果
@@ -49,47 +46,57 @@ SELECT結果
 
 #shops_menuテーブル=======================================
 
-CREATE TABLE test.shops_menu (
+CREATE TABLE stage.shops_menu (
     shop_id  INTEGER NOT NULL,
     menu_id  INTEGER NOT NULL,
     PRIMARY KEY (shop_id, menu_id),
-    FOREIGN KEY (shop_id) REFERENCES test.shops(shop_id) ON DELETE CASCADE,
-    FOREIGN KEY (menu_id) REFERENCES test.menu(menu_id) ON DELETE CASCADE
+    FOREIGN KEY (shop_id) REFERENCES stage.shops(shop_id) ON DELETE CASCADE,
+    FOREIGN KEY (menu_id) REFERENCES stage.mst_menu(menu_id) ON DELETE CASCADE
 );
 
 #INSERT
-INSERT INTO test.shops_menu (shop_id, menu_id)
+INSERT INTO stage.shops_menu (shop_id, menu_id)
 VALUES
+    (1, 1),
     (1, 2),
+    (1, 3),
+    (1, 4),
+    (1, 5),
     (1, 6);
 
 
 #menu名取得する時
 SELECT m.menu_name
-FROM test.shops_menu sm
-JOIN test.menu m ON sm.menu_id = m.menu_id
+FROM stage.shops_menu sm
+JOIN stage.menu m ON sm.menu_id = m.menu_id
 WHERE sm.shop_id = 1;
 
  =================================================
 
 
 #addressテーブル=======================================
-CREATE TABLE test.address (
+CREATE TABLE stage.address (
     shop_id   INTEGER PRIMARY KEY,
     prefecture VARCHAR(100),
     city       VARCHAR(100),
     street     VARCHAR(100),
-    FOREIGN KEY (shop_id) REFERENCES test.shops(shop_id) ON DELETE CASCADE
+    location  geometry(Point, 4326),
+    FOREIGN KEY (shop_id) REFERENCES stage.shops(shop_id) ON DELETE CASCADE
 );
 
 #INSERT
-INSERT INTO test.address (shop_id, prefecture, city, street)
-VALUES (1, '大阪府', '大阪市北区', '豊崎３丁目１９−３');
+INSERT INTO stage.address (shop_id, prefecture, city, street,location)
+VALUES (1, '大阪府', '大阪市西区', '北堀江１丁目９−６',ST_SetSRID(ST_MakePoint(34.67426512856428, 135.49588345726798), 4326));
 
 
 #SELECT文
-SELECT a.prefecture, a.city, a.street
-FROM test.address a
+SELECT 
+    a.prefecture, 
+    a.city, 
+    a.street,
+    ST_X(location) AS longitude, 
+    ST_Y(location) AS latitude
+FROM stage.address a
 WHERE a.shop_id = 1;
 
  =================================================
@@ -97,12 +104,15 @@ WHERE a.shop_id = 1;
 
 
 select
-    s.shop_id,s.shop_name,
-    ST_X(s.location) AS longitude,
-    ST_Y(location) AS latitude,a.prefecture,
-    a.city,a.street
-from test.shops s
-inner join test.address a
+    s.shop_id,
+    s.shop_name,
+    a.prefecture,
+    a.city,
+    a.street,
+    ST_X(a.location) AS longitude,
+    ST_Y(a.location) AS latitude
+from stage.shops s
+inner join stage.address a
 on s.shop_id = a.shop_id
 where s.shop_id = 1;
 
@@ -116,9 +126,9 @@ where s.shop_id = 1;
 
 #menu名取得する時
 SELECT STRING_AGG(menu_name, ',') AS menu_list
-FROM test.menu
-JOIN test.shops_menu ON test.menu.menu_id = test.shops_menu.menu_id
-WHERE test.shops_menu.shop_id = 1;
+FROM stage.menu
+JOIN stage.shops_menu ON stage.menu.menu_id = stage.shops_menu.menu_id
+WHERE stage.shops_menu.shop_id = 1;
        menu_list
 ------------------------
  nachos,tacos,guacamole
@@ -126,20 +136,21 @@ WHERE test.shops_menu.shop_id = 1;
 
 
 #select完成系
-SELECT
+SELECT                         
     s.shop_id,
     s.shop_name,
-    ST_X(s.location) AS longitude,
-    ST_Y(s.location) AS latitude,
     a.prefecture,
     a.city,
     a.street,
+    ST_X(a.location) AS longitude,
+    ST_Y(a.location) AS latitude,
     STRING_AGG(m.menu_name, ',') AS menu_list
-FROM test.shops s
-INNER JOIN test.address a ON s.shop_id = a.shop_id
-INNER JOIN test.shops_menu sm ON s.shop_id = sm.shop_id
-INNER JOIN test.menu m ON sm.menu_id = m.menu_id
-GROUP BY s.shop_id, s.shop_name, s.location, a.prefecture, a.city, a.street;
+FROM stage.shops s
+INNER JOIN stage.address a ON s.shop_id = a.shop_id
+INNER JOIN stage.shops_menu sm ON s.shop_id = sm.shop_id
+INNER JOIN stage.mst_menu m ON sm.menu_id = m.menu_id
+where sm.show_flg is true
+GROUP BY s.shop_id, s.shop_name, a.prefecture, a.city, a.street,a.location;
 
 結果
  shop_id | shop_name | longitude | latitude | prefecture |    city    |      street       |       menu_list

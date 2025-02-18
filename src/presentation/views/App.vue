@@ -27,9 +27,8 @@
         @showLoading="showLoading"
         @hideLoading="hideLoading"
         @showMessageBox="showMessageBox"
-        @showErrorMessageConfirmWithCallBack="
-          showErrorMessageConfirmWithCallBack
-        "
+        @showMessageBox2="showMessageBox2"
+        @showErrorMessageWithCallBack="showErrorMessageWithCallBack"
         @showConfirm="showConfirm"
         @toOtherPage="toOtherPage"
       ></router-view>
@@ -38,7 +37,7 @@
   <footer>
     <nav>
       <ul>
-        <li @click="toOtherPage('')">
+        <li @click="toOtherPage('howto')">
           <img :src="home" alt="" />
           <p>Home</p>
         </li>
@@ -66,16 +65,35 @@ import search from "@/presentation/assets/search.svg";
 import plus from "@/presentation/assets/plus.svg";
 import { useRouter } from "vue-router";
 import { ElLoading, ElMessageBox } from "element-plus";
-import ElMessageBoxType from "@/domain/model/lang/ElmessageBoxType";
+import ElMessageBoxType from "@/domain/model/lang/ElMessageBoxType";
 import "element-plus/dist/index.css";
-import { Loading } from "@element-plus/icons-vue";
 import { LoadingInstance } from "element-plus/es/components/loading/src/loading";
 import { useLoadingStore } from "@/infrastructure/store/LoadingStore";
-import { nextTick, onMounted } from "vue";
+import { nextTick, onMounted, ref } from "vue";
+import ShopListTransfer from "@/infrastructure/network/shop/ShopListTransfer";
+import ShopInfo from "@/domain/model/shop/ShopInfo";
+import { useShopInfoStore } from "@/infrastructure/store/ShopInfoStore";
 
 const router = useRouter();
 const storeLoading = useLoadingStore();
 let loadingInstance: LoadingInstance | null = null;
+const shopList = ref<ShopInfo[]>([]);
+const shopListTransfer = new ShopListTransfer();
+const storeShopInfo = useShopInfoStore();
+
+onMounted(async () => {
+  try {
+    shopList.value = await shopListTransfer.getShopList();
+    if (shopList.value.length === 0) return;
+    storeShopInfo.setShopInfos(shopList.value);
+  } catch (error) {
+    console.error("店舗情報の取得エラー:", error);
+  } finally {
+    nextTick(() => {
+      window.scrollTo(0, 0);
+    });
+  }
+});
 
 const showLoading = () => {
   console.log("showloading");
@@ -115,7 +133,7 @@ const showMessageBox = async (
   } catch (e) {}
 };
 
-const showErrorMessageConfirmWithCallBack = async (
+const showErrorMessageWithCallBack = async (
   type: ElMessageBoxType,
   title: string,
   message: string,
@@ -131,6 +149,29 @@ const showErrorMessageConfirmWithCallBack = async (
     showCancelButton: true,
     confirmButtonText: "OK",
     callback: callback,
+  });
+};
+
+const showMessageBox2 = async (
+  type: ElMessageBoxType,
+  title: string,
+  message: string,
+  confirmLabel: string,
+  callback: () => void
+) => {
+  await ElMessageBox({
+    autofocus: false,
+    title: title.split("&nbsp;").join(" "),
+    message,
+    type,
+    dangerouslyUseHTMLString: true,
+    callback: (action: any) => {
+      if (action === "confirm") {
+        callback();
+      }
+    },
+    showClose: false,
+    confirmButtonText: confirmLabel,
   });
 };
 
@@ -160,30 +201,11 @@ const showConfirm = async (
   });
 };
 
-// onMounted(async () => {
-//   console.log("mounted");
-//   nextTick(() => {
-//     showConfirm(
-//       ElMessageBoxType.WARNING,
-//       "削除確認",
-//       "店舗の情報を削除してもよろしいですか？",
-//       "削除する",
-//       "キャンセル",
-//       () => {
-//         console.log("delete");
-//       }
-//     );
-//   });
-// });
-
-const toOtherPage = async (pageName: string) => {
-  showLoading(); // ローディング開始
+const toOtherPage = async (pageName: string, shopInfo?: ShopInfo) => {
   try {
     await router.push(`/${pageName}`);
   } catch (error) {
     console.error("Navigation error:", error);
-  } finally {
-    hideLoading(); // ローディング終了
   }
 };
 </script>
@@ -223,8 +245,10 @@ header {
   }
 }
 #main {
-  height: calc(100vh - 120px);
-  background-color: mediumseagreen;
+  /* height: calc(100vh - 120px); */
+  height: auto;
+  /* background-color: mediumseagreen; */
+  background-color: #569cdb;
   display: grid;
   justify-content: center;
   color: white;

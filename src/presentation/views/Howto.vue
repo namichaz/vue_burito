@@ -13,14 +13,14 @@
       <h2>1. お店を検索してみよう</h2>
       <p class="text">
         まずは、ページ下部の「Search」ボタンから、スポットを検索・閲覧してみましょう。
-        スポットの検索方法は、「現在地から検索」と「住所・スポット名から検索」の二種類。リスト表示にすると、現在投稿されているすべてのスポットの情報を閲覧することができます。
+        スポットの検索方法は、「現在地から検索」と「住所・スポット名から検索」の二種類。
       </p>
     </div>
     <div class="explain">
       <div class="icon"><img :src="chart" alt="search" /></div>
-      <h2>2. 人気のお店を調べよう</h2>
+      <h2>2. 一覧でお店を調べよう</h2>
       <p class="text">
-        ページ下部の「Rank」ボタンから、いいねの数が多いお店を見てみましょう。
+        ページ下部の「List」ボタンから、現在登録されているすべてのお店の情報を閲覧することができます。また、そのお店が提供してるフードサービスが確認できます。
       </p>
     </div>
     <div class="explain">
@@ -34,7 +34,6 @@
 </template>
 
 <script setup lang="ts">
-import ShopListTransfer from "@/infrastructure/network/shop/ShopListTransfer";
 import { onMounted, ref } from "vue";
 import { Shop } from "@/infrastructure/network/shop/res/Shop";
 import chart from "@/presentation/assets/chart.svg";
@@ -43,14 +42,6 @@ import plus from "@/presentation/assets/plus.svg";
 import { useShopInfoStore } from "@/infrastructure/store/ShopInfoStore";
 
 const storeShopInfo = useShopInfoStore();
-const shopListTransfer = new ShopListTransfer();
-const shopList = ref<Shop[]>([]);
-
-const getShopInfo = async () => {
-  const shopInfo = await shopListTransfer.getShopList();
-  console.log("shopInfo:", shopInfo);
-  // shopList.value = shopInfo;
-};
 
 onMounted(() => {
   storeShopInfo.isPostValue = true;

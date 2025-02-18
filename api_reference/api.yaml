@@ -16,43 +16,48 @@ paths:
               schema:
                 type: object
                 properties:
-                  code:
-                    type: integer
-                    example: 200
-                  message:
-                    type: string
-                    example: Success
                   shopList:
                     type: array
                     items:
                       type: object
                       properties:
-                        shop_id:
-                          type: integer
-                          example: 1
-                        shop_name:
-                          type: string
-                          example: Elsocalo Burito
-                        longitude:
-                          type: number
-                          format: float
-                          example: 139.6917
-                        latitude:
-                          type: number
-                          format: float
-                          example: 35.6895
-                        prefecture:
-                          type: string
-                          example: 大阪府
-                        city:
-                          type: string
-                          example: 大阪市北区
-                        street:
-                          type: string
-                          example: 豊崎３丁目１９−３
-                        menu_list:
-                          type: string
-                          example: nachos,tacos,guacamole
+                        shop:
+                          type: object
+                          properties:
+                            shop_id:
+                              type: integer
+                              example: 62
+                            shop_name:
+                              type: string
+                              example: El Zocalo Burrito
+                        address:
+                          type: object
+                          properties:
+                            prefecture:
+                              type: string
+                              example: 大阪府
+                            city:
+                              type: string
+                              example: 大阪市西区
+                            street:
+                              type: string
+                              example: 北堀江１丁目９−６ ウイングス・ギザ
+                            longitude:
+                              type: number
+                              format: float
+                              example: 34.6742302
+                            latitude:
+                              type: number
+                              format: float
+                              example: 135.4958414
+                        menuList:
+                          type: object
+                          properties:
+                            items:
+                              type: array
+                              items:
+                                type: string
+                              example: ["tacos", "burrito", "guacamole"]
         "400":
           description: パラメータ不正
           content:
@@ -61,7 +66,7 @@ paths:
                 code: 400
                 message: Bad Request
         "404":
-          description: ページが見つからない
+          description: お店が見つからない
           content:
             application/json:
               example:
@@ -133,7 +138,7 @@ paths:
                 code: 400
                 message: Bad Request
         "404":
-          description: ページが見つからない
+          description: お店が見つからない
           content:
             application/json:
               example:
@@ -212,7 +217,7 @@ paths:
                 code: 400
                 message: Bad Request
         "404":
-          description: ページが見つからない
+          description: お店が見つからない
           content:
             application/json:
               example:
@@ -252,7 +257,7 @@ paths:
                 code: 400
                 message: Bad Request
         "404":
-          description: ページが見つからない
+          description: お店が見つからない
           content:
             application/json:
               example:

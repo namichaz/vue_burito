@@ -1,30 +1,42 @@
 <template>
   <div id="post">
     <h1>Shop List</h1>
-    <div id="cardArea">
+    <div id="cardArea" v-if="isShowList()">
       <Card
-        v-for="(shop, index) in shopList"
+        v-for="(shopInfo, index) in shopInfos"
         :key="index"
-        :shopId="shop.shop_id"
-        :shopName="shop.shop_name"
-        :prefecture="shop.prefecture"
-        :city="shop.city"
-        :street="shop.street"
-        :menuList="shop.menu_list.split(',')"
-        @execDelete="execDelete(storeShopInfo.getShop().shop_id)"
-        @execEdit="execEdit(storeShopInfo.getShop().shop_id)"
+        :shopId="shopInfo.shop.shop_id"
+        :shopName="shopInfo.shop.shop_name"
+        :prefecture="shopInfo.address.prefecture"
+        :city="shopInfo.address.city"
+        :street="shopInfo.address.street"
+        :latitude="shopInfo.address.latitude"
+        :longitude="shopInfo.address.longitude"
+        :menuList="shopInfo.menuList"
+        @execDelete="execDelete"
+        @execEdit="execEdit"
+        @navigateToMap="navigateToMap"
       />
     </div>
+    <span v-else>表示するリストがありません</span>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import Card from "@/components/Card.vue";
-import ElMessageBoxType from "@/domain/model/lang/ElmessageBoxType";
+import ElMessageBoxType from "@/domain/model/lang/ElMessageBoxType";
 import { useShopInfoStore } from "@/infrastructure/store/ShopInfoStore";
+import ShopDeleteTransfer from "@/infrastructure/network/shop/ShopDeleteTransfer";
+import ShopListTransfer from "@/infrastructure/network/shop/ShopListTransfer";
+import ShopInfo from "@/domain/model/shop/ShopInfo";
+import router from "@/router";
 
 const storeShopInfo = useShopInfoStore();
+const shopDeleteTransfer = new ShopDeleteTransfer();
+const shopListTransfer = new ShopListTransfer();
+const shopList = ref([ShopInfo.empty()]);
+
 const emit = defineEmits<{
   (
     e: "showConfirm",
@@ -35,59 +47,128 @@ const emit = defineEmits<{
     cancelLabel: string,
     callback: () => void
   ): void;
+  (
+    e: "showMessageBox",
+    type: ElMessageBoxType,
+    title: string,
+    message: string
+  ): void;
+  (
+    e: "showMessageBox2",
+    type: ElMessageBoxType,
+    title: string,
+    message: string,
+    confirmLabel: string,
+    callback: () => void
+  ): void;
+  (
+    e: "showErrorMessageWithCallBack",
+    type: ElMessageBoxType,
+    title: string,
+    message: string,
+    callback: () => void
+  ): void;
   (e: "toOtherPage", pageName: string): void;
+  (e: "showLoading"): void;
+  (e: "hideLoading"): void;
 }>();
 
 // 店舗リストのサンプルデータ
-const shopList = ref([
-  {
-    shop_id: 1,
-    shop_name: "Elsocalo Burrito",
-    prefecture: "大阪府",
-    city: "大阪市北区",
-    street: "豊崎３丁目１９−３",
-    menu_list: "nachos,tacos,guacamole",
-  },
-  {
-    shop_id: 2,
-    shop_name: "Taco Palace",
-    prefecture: "東京都",
-    city: "新宿区",
-    street: "西新宿２丁目８−１",
-    menu_list: "burrito,tacos,salsa",
-  },
-  {
-    shop_id: 3,
-    shop_name: "Ola Tacos Bar",
-    prefecture: "大阪府",
-    city: "大阪市浪速区",
-    street: "浪速２丁目８−１",
-    menu_list: "tacos,burrito,tortilla,nachos,guacamole,enchiladas",
-  },
-]);
+const shopInfos = ref(storeShopInfo.getShopInfos());
 
-const execDelete = async (shopId: number) => {
+const isShowList = () => {
+  return shopInfos.value.length > 0;
+};
+
+const getShopList = async () => {
+  try {
+    shopList.value = await shopListTransfer.getShopList();
+    if (shopList.value.length === 0) return;
+    storeShopInfo.setShopInfos(shopList.value);
+  } catch (error) {
+    console.error("店舗情報の取得エラー:", error);
+  } finally {
+    shopInfos.value = storeShopInfo.getShopInfos();
+  }
+};
+
+const returnHome = () => {
+  router.push({ name: "howto" });
+};
+
+const execDelete = (shopId: number, shop_name: string) => {
+  console.log("shopId:", shopId);
   emit(
     "showConfirm",
     ElMessageBoxType.WARNING,
     "削除確認",
-    `${EventTarget.name}の情報を削除してもよろしいですか？`,
+    `${shop_name}を削除してもよろしいですか？`,
     "削除する",
     "キャンセル",
-    () => {
-      console.log("delelte");
+    async () => {
+      await deleteShopCard(shopId, shop_name);
     }
   );
 };
 
-const execEdit = (shopId: number) => {
+const deleteShopCard = async (shopId: number, shop_name: string) => {
+  try {
+    emit("showLoading");
+    await shopDeleteTransfer.deleteShop(shopId);
+    emit(
+      "showMessageBox2",
+      ElMessageBoxType.INFO,
+      "削除成功",
+      `${shop_name}を削除しました`,
+      "OK",
+      async () => {
+        window.location.reload();
+      }
+    );
+  } catch (e) {
+    emit(
+      "showErrorMessageWithCallBack",
+      ElMessageBoxType.ERROR,
+      "削除失敗",
+      `削除できませんでした<br>エラー内容：${e}`,
+      returnHome
+    );
+  } finally {
+    emit("hideLoading");
+  }
+};
+
+const execEdit = (shopInfo: ShopInfo) => {
   storeShopInfo.isPostValue = false;
-  console.log("isPost", storeShopInfo.isPost());
-  emit("toOtherPage", "post");
+  emit(
+    "showConfirm",
+    ElMessageBoxType.INFO,
+    "編集確認",
+    `${shopInfo.shop.shop_name}の情報を編集しますか？`,
+    "編集する",
+    "キャンセル",
+    () => {
+      storeShopInfo.setEditShopInfo(shopInfo);
+      emit("toOtherPage", "post");
+    }
+  );
+};
+
+const navigateToMap = (
+  latitude: number,
+  longitude: number,
+  shopName: string
+) => {
+  storeShopInfo.setLatitude(longitude);
+  storeShopInfo.setLongitude(latitude);
+  storeShopInfo.setShopName(shopName);
+  storeShopInfo.isList = true;
+  router.push({ name: "search" });
 };
 
 onMounted(() => {
   storeShopInfo.isPostValue = true;
+  getShopList();
 });
 </script>
 

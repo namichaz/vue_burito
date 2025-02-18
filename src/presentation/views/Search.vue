@@ -23,11 +23,21 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, onBeforeMount, nextTick } from "vue";
 import { useShopInfoStore } from "@/infrastructure/store/ShopInfoStore";
+import { useMapInfoStore } from "@/infrastructure/store/MapInfoStore";
+import ShopInfo from "@/domain/model/shop/ShopInfo";
+import burrito from "@/presentation/assets/burrito.svg";
+import ShopListTransfer from "@/infrastructure/network/shop/ShopListTransfer";
 
 const storeShopInfo = useShopInfoStore();
+const storeMapInfo = useMapInfoStore();
+const shopListTransfer = new ShopListTransfer();
 const searchQuery = ref<string>(""); // 検索クエリを保持するref
+const initialMarkers = [{ lat: 0, lng: 0, title: "" }];
+const shopList = ref<ShopInfo[]>([]);
+
+let shopInfos = ref<ShopInfo[]>([]);
 let map: google.maps.Map; // google.maps.Map型に変更
 let service: google.maps.places.PlacesService; // google.maps.places.PlacesService型に変更
 let markers: google.maps.Marker[] = []; // google.maps.Marker[]型に変更（マーカーの配列）
@@ -38,25 +48,28 @@ const emit = defineEmits<{
   (e: "hideLoading"): void;
 }>();
 
-// 現在位置を取得する関数
+//TODO 現在位置を取得する関数
 const getCurrentLocation = (): Promise<GeolocationPosition> => {
   try {
-    emit("showLoading");
+    // emit("showLoading");
     return new Promise((resolve, reject) => {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(resolve, reject);
+        navigator.geolocation.getCurrentPosition(
+          resolve,
+          reject,
+          { enableHighAccuracy: true, timeout: 10000 } // 高精度を避け、タイムアウトを設定
+        );
       } else {
         reject(new Error("Geolocation is not supported by this browser."));
       }
     });
   } finally {
-    emit("hideLoading");
   }
 };
 
+//TODO 現在位置移動する関数
 const moveToCurrentLocation = async () => {
   try {
-    emit("showLoading");
     const position: GeolocationPosition = await getCurrentLocation();
     const currentLatLng = new google.maps.LatLng(
       position.coords.latitude,
@@ -77,24 +90,64 @@ const moveToCurrentLocation = async () => {
       title: "現在地",
     });
   } finally {
-    emit("hideLoading");
   }
 };
 
-// 初期マップ設定
+//TODO 登録されてるお店のマーカー用の緯度経度情報作る関数
+const buildMarkerData = async () => {
+  shopInfos.value = await storeShopInfo.getShopInfos();
+  console.log("pppppppp=", storeShopInfo.getShopInfos());
+  console.log("wwwwwww=", shopInfos.value);
+  for (var shopInfo of shopInfos.value) {
+    let param = {
+      lat: shopInfo.address.longitude,
+      lng: shopInfo.address.latitude,
+      title: shopInfo.shop.shop_name,
+    };
+    await initialMarkers.push(param);
+  }
+  console.log("onBeforeMountの中initialMarkers=", initialMarkers);
+};
+
+//TODO onBeforeMount
+onBeforeMount(async () => {
+  try {
+    shopList.value = await shopListTransfer.getShopList();
+    if (shopList.value.length === 0) return;
+    storeShopInfo.setShopInfos(shopList.value);
+  } catch (error) {
+    console.error("店舗情報の取得エラー:", error);
+  } finally {
+    nextTick(() => {
+      window.scrollTo(0, 0);
+    });
+  }
+  buildMarkerData();
+});
+
+//TODO onMounted
 onMounted(async () => {
   storeShopInfo.isPostValue = true;
+  let position: GeolocationPosition | null = null; // 初期値を null に設定
   try {
     emit("showLoading");
+
     if (typeof google === "undefined" || typeof google.maps === "undefined") {
       console.error("Google Maps API is not loaded.");
       return;
     }
-    // 現在地を取得
-    const position: GeolocationPosition = await getCurrentLocation();
+    position = await getCurrentLocation();
+
+    if (!position) {
+      throw new Error("現在地が取得できませんでした");
+    }
+
+    const lnt = storeShopInfo.getLongitude();
+    const lat = storeShopInfo.getLatitude();
+
     const currentLatLng = new google.maps.LatLng(
-      position.coords.latitude,
-      position.coords.longitude
+      storeShopInfo.isFromList() ? lat : position.coords.latitude,
+      storeShopInfo.isFromList() ? lnt : position.coords.longitude
     );
 
     const Options: google.maps.MapOptions = {
@@ -103,52 +156,70 @@ onMounted(async () => {
       mapTypeId: "roadmap",
     };
     map = new google.maps.Map(document.getElementById("map")!, Options);
+    let currentMarker = new google.maps.Marker();
 
-    // 現在地にマーカーを設定
-    const currentMarker = new google.maps.Marker({
-      position: currentLatLng,
-      map: map,
-      title: "現在地",
-    });
-
+    if (storeShopInfo.isFromList()) {
+      currentMarker = new google.maps.Marker({
+        position: currentLatLng,
+        map: map,
+        title: storeShopInfo.getShopName(),
+        icon: {
+          url: burrito, // SVGのURLを指定
+          scaledSize: new google.maps.Size(40, 40), // アイコンのサイズを指定
+        } as google.maps.Icon,
+      });
+    } else {
+      // 現在地にマーカーを設定
+      currentMarker = new google.maps.Marker({
+        position: currentLatLng,
+        map: map,
+        title: "現在地",
+      });
+    }
     // 現在地のマーカーがクリックされたらInfoWindowを表示
     infoWindow = new google.maps.InfoWindow();
-    currentMarker.addListener("click", () => {
-      infoWindow.setContent(
-        `<div style="color: black;"><strong>現在地</strong><br>緯度: ${currentLatLng.lat()}<br>経度: ${currentLatLng.lng()}</div>`
-      );
-      infoWindow.open(map, currentMarker);
-    });
 
-    // 最初にピンを配置（例: 大阪、東京）
-    const initialMarkers = [
-      { lat: 34.70967626120183, lng: 135.4974168117349, title: "大阪" }, // 大阪
-      { lat: 35.6762, lng: 139.6503, title: "東京" }, // 東京
-      { lat: 34.6742537, lng: 135.4958855, title: "El Zocalo Burrito" }, // お店の例
-    ];
-
-    // 初期位置にマーカーを配置
-    initialMarkers.forEach((marker) => {
-      const position = new google.maps.LatLng(marker.lat, marker.lng);
-      const googleMarker = new google.maps.Marker({
-        position,
-        map: map,
-        title: marker.title,
-      });
-      markers.push(googleMarker); // markers 配列に追加
-
-      // マーカーがクリックされたときの動作
-      googleMarker.addListener("click", () => {
-        // InfoWindowの内容を設定
+    if (storeShopInfo.isFromList()) {
+      currentMarker.addListener("click", () => {
         infoWindow.setContent(
-          `<div style="color: black; height:200px;"><strong>${marker.title}</strong><br>緯度: ${marker.lat}<br>経度: ${marker.lng}</div>`
+          `<div style="color: black;width:auto; height:50px;"><strong>${storeShopInfo.getShopName()}</strong>`
         );
-        infoWindow.open(map, googleMarker); // マーカーに関連付けてInfoWindowを表示
+        infoWindow.open(map, currentMarker);
       });
-    });
+    } else {
+      currentMarker.addListener("click", () => {
+        infoWindow.setContent(
+          `<div style="color: black;width:auto; height:50px;"><strong>現在地</strong>`
+        );
+        infoWindow.open(map, currentMarker);
+      });
+    }
+    setTimeout(() => {
+      // 初期位置にマーカーを配置
+      initialMarkers.forEach((marker) => {
+        console.log(initialMarkers.length);
+        console.log("marker=", marker);
+        const position = new google.maps.LatLng(marker.lat, marker.lng);
+        const googleMarker = new google.maps.Marker({
+          position,
+          map: map,
+          title: marker.title,
+          icon: {
+            url: burrito, // SVGのURLを指定
+            scaledSize: new google.maps.Size(40, 40), // アイコンのサイズを指定
+          } as google.maps.Icon,
+        });
+        markers.push(googleMarker);
+        googleMarker.addListener("click", () => {
+          infoWindow.setContent(
+            `<div style="color: black;width:auto; height:50px;"><strong>${marker.title}</strong>`
+          );
+          infoWindow.open(map, googleMarker);
+        });
+      });
+    }, 1000);
 
-    // PlacesServiceを作成
-    service = new google.maps.places.PlacesService(map);
+    if (position) emit("hideLoading");
   } catch (error) {
     console.error("現在地取得エラー:", error);
     // 現在地が取得できなかった場合は大阪を初期表示にする
@@ -163,14 +234,10 @@ onMounted(async () => {
     };
     map = new google.maps.Map(document.getElementById("map")!, Options);
 
-    // 最初にピンを配置（例: 大阪、東京）
     const initialMarkers = [
-      { lat: 34.70967626120183, lng: 135.4974168117349, title: "大阪" }, // 大阪
-      { lat: 35.6762, lng: 139.6503, title: "東京" }, // 東京
-      { lat: 34.6742537, lng: 135.4958855, title: "El Zocalo Burrito" }, // お店の例
+      { lat: 34.70967626120183, lng: 135.4974168117349, title: "大阪" },
     ];
 
-    // 初期位置にマーカーを配置
     initialMarkers.forEach((marker) => {
       const position = new google.maps.LatLng(marker.lat, marker.lng);
       const googleMarker = new google.maps.Marker({
@@ -178,33 +245,35 @@ onMounted(async () => {
         map: map,
         title: marker.title,
       });
-      markers.push(googleMarker); // markers 配列に追加
+      markers.push(googleMarker);
 
-      // マーカーがクリックされたときの動作
       googleMarker.addListener("click", () => {
-        // InfoWindowの内容を設定
         infoWindow.setContent(
-          `<div style="color: black; height:200px;"><strong>${marker.title}</strong><br>緯度: ${marker.lat}<br>経度: ${marker.lng}</div>`
+          `<div style="color: black;width:auto; height:50px;"><strong>${marker.title}</strong>`
         );
-        infoWindow.open(map, googleMarker); // マーカーに関連付けてInfoWindowを表示
+        infoWindow.open(map, googleMarker);
       });
     });
-  } finally {
     emit("hideLoading");
+  } finally {
+    storeShopInfo.isList = false;
+    storeMapInfo.setShowFirst(false);
   }
 });
 
-// 検索処理
+//TODO 検索処理
 const searchLocation = () => {
+  console.log("search");
   if (searchQuery.value.trim() === "") {
     alert("検索キーワードを入力してください");
     return;
   }
-
   const request = {
     query: searchQuery.value,
     fields: ["geometry", "name"],
   };
+  // PlacesServiceを作成
+  service = new google.maps.places.PlacesService(map);
 
   // 検索を実行
   service.findPlaceFromQuery(
@@ -222,36 +291,60 @@ const searchLocation = () => {
           map.setZoom(15); // ズームレベルを設定
 
           // 新しいマーカーを追加
-          const newMarker = new google.maps.Marker({
-            map: map,
-            position: location,
-            title: results[0].name,
-          });
+          // const newMarker = new google.maps.Marker({
+          //   map: map,
+          //   position: location,
+          //   title: results[0].name,
+          // });
 
           // 新しいマーカーにクリックイベントを追加
-          newMarker.addListener("click", () => {
-            infoWindow.setContent(
-              `<div style="color: black;"><strong>${
-                results[0].name
-              }</strong><br>緯度: ${location!.lat()}<br>経度: ${location!.lng()}</div>`
-            );
-            infoWindow.open(map, newMarker);
-          });
+          // newMarker.addListener("click", () => {
+          //   infoWindow.setContent(
+          //     `<div style="color: black;width:auto; height:50px;"><strong>${results[0].name}</strong>`
+          //   );
+          //   infoWindow.open(map, newMarker);
+          // });
 
-          // 既存のマーカーも表示したまま
-          markers.forEach((existingMarker) => {
-            existingMarker.setMap(map); // 既存のマーカーを表示
-          });
+          // 既存のマーカーも表示したまま;
+          // markers.forEach((existingMarker) => {
+          //   existingMarker.setMap(map); // 既存のマーカーを表示
+          // });
 
           // 新しいマーカーを追加
-          markers.push(newMarker);
+          // markers.push(newMarker);
         } else {
           alert("場所が見つかりませんでした。");
         }
+
+        setTimeout(() => {
+          // 初期位置にマーカーを配置
+          initialMarkers.forEach((marker) => {
+            console.log(initialMarkers.length);
+            console.log("marker=", marker);
+            const position = new google.maps.LatLng(marker.lat, marker.lng);
+            const googleMarker = new google.maps.Marker({
+              position,
+              map: map,
+              title: marker.title,
+              icon: {
+                url: burrito, // SVGのURLを指定
+                scaledSize: new google.maps.Size(40, 40), // アイコンのサイズを指定
+              } as google.maps.Icon,
+            });
+            markers.push(googleMarker);
+            googleMarker.addListener("click", () => {
+              infoWindow.setContent(
+                `<div style="color: black;width:auto; height:50px;"><strong>${marker.title}</strong>`
+              );
+              infoWindow.open(map, googleMarker);
+            });
+          });
+        }, 1000);
       } catch {
         console.log("場所の取得中にエラーが発生しました。");
       } finally {
         emit("hideLoading");
+        searchQuery.value = "";
       }
     }
   );

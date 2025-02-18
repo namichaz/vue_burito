@@ -7,34 +7,35 @@ skinparam linetype ortho
 
 rectangle お店 #LightBlue {
   entity "shops" as shops {
-    + shop_id : serial
+    + shop_id : serial <<PK>>
     --
     * shop_name : varchar(100)
-        '(Point, 4326)は緯度経度を２次元のデータで格納するという意味
-    * location : GEOMETRY(Point, 4326)
   }
 }
 
 rectangle 住所 #lightgreen {
   entity "address" as address {
-    + shop_id: int <<FK>>
+    + shop_id: integer <<FK>>
     --
     * prefecture : varchar(100)
     * city : varchar(100)
     * street : varchar(100)
+            '(Point, 4326)は緯度経度を２次元のデータで格納するという意味
+    * location : GEOMETRY(Point, 4326)
   }
 }
 
 rectangle お店のメニュー #LightCoral{
   entity "shops_menu" as shops_menu {
-    + shop_id : int <<PK>><<FK>>
-    + menu_id : int <<PK>><<FK>>
+    + shop_id : integer <<FK>>
+    + menu_id : integer <<FK>>
     --
+    * show_flg : boolean
   }
 }
 
 rectangle メニュー #LightCoral{
-  entity "menu" as menu {
+  entity "mst_menu" as mst_menu {
     + menu_id : serial <<PK>>
     --
     + menu_name : varchar(100) <<UNIQUE>> <<NOT NULL>>
@@ -45,6 +46,6 @@ rectangle メニュー #LightCoral{
 
 shops ||--|| address
 shops ||--|{ shops_menu
-shops_menu }|--|| menu
+shops_menu }|--|| mst_menu
 
 @enduml

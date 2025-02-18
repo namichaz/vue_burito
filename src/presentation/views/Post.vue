@@ -1,6 +1,6 @@
 <template>
   <div id="post">
-    <h1>{{ storeShopInfo.isPost() ? "Post" : "Edit" }}</h1>
+    <h1>{{ isPost ? "Post" : "Edit" }}</h1>
     <div class="inputArea">
       <h3>Shop Name</h3>
       <input type="text" placeholder="お店の名前" v-model="shopName" />
@@ -8,7 +8,7 @@
     <div class="inputArea">
       <h3>Adress</h3>
       <v-select
-        v-model="prefacture"
+        v-model="prefecture"
         label="都道府県"
         :items="prefectures"
         variant="solo-filled"
@@ -34,23 +34,41 @@
         </v-col>
       </v-row>
     </div>
-    <div class="btnArea">
-      <p v-if="isError" style="color: red; padding: 10px">{{ errMessage }}</p>
-      <v-btn class="initButton" variant="elevated" @click="onSubmit">
-        {{ storeShopInfo.isPost() ? "登録" : "更新" }}
+    <p v-if="isError" style="color: red; padding: 10px">{{ errMessage }}</p>
+    <div class="btnArea" :class="{ editBtnArea: !isPost }">
+      <v-btn
+        v-if="!isPost"
+        :class="{ editBtn: !isPost }"
+        variant="elevated"
+        @click="returnList"
+      >
+        もどる
+      </v-btn>
+      <v-btn
+        class="initButton"
+        :class="{ editBtn: !isPost }"
+        variant="elevated"
+        @click="onSubmit"
+      >
+        {{ isPost ? "登録" : "更新" }}
       </v-btn>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { getMenuItems, MenuItem } from "@/domain/model/shop/MenuItem";
 import { useShopInfoStore } from "@/infrastructure/store/ShopInfoStore";
 import { Loader } from "@googlemaps/js-api-loader";
 import Shop from "@/domain/model/shop/Shop";
 import ShopInfo from "@/domain/model/shop/ShopInfo";
 import Address from "@/domain/model/shop/Address";
+import ShopRegisterTransfer from "@/infrastructure/network/shop/ShopRegisterTransfer";
+import ElMessageBoxType from "@/domain/model/lang/ElMessageBoxType";
+import router from "@/router";
+import ShopDeleteTransfer from "@/infrastructure/network/shop/ShopDeleteTransfer";
+import { nextTick } from "process";
 
 const apiKey = import.meta.env.VITE_GMAP_APIKEY;
 const address = ref("");
@@ -58,26 +76,33 @@ const latitude = ref(0);
 const longitude = ref(0);
 let location = { latitude: 0, longitude: 0 };
 const storeShopInfo = useShopInfoStore();
+const isPost = computed(() => storeShopInfo.isPost());
 const shopInfo = ref(ShopInfo.empty());
-const shopName = ref(
-  storeShopInfo.isPost() ? "" : storeShopInfo.getShopInfo().shop.shop_name
+const shopId = ref(
+  isPost.value ? 0 : storeShopInfo.getEditShopInfo().shop.shop_id
 );
-const prefacture = ref(
-  storeShopInfo.isPost() ? "" : storeShopInfo.getShopInfo().address.prefacture
+const shopName = ref(
+  isPost.value ? "" : storeShopInfo.getEditShopInfo().shop.shop_name
+);
+const prefecture = ref(
+  isPost.value ? "" : storeShopInfo.getEditShopInfo().address.prefecture
 );
 const cityName = ref(
-  storeShopInfo.isPost() ? "" : storeShopInfo.getShopInfo().address.city
+  isPost.value ? "" : storeShopInfo.getEditShopInfo().address.city
 );
 const streetName = ref(
-  storeShopInfo.isPost() ? "" : storeShopInfo.getShopInfo().address.street
+  isPost.value ? "" : storeShopInfo.getEditShopInfo().address.street
 );
 const checkBoxValue = ref(
-  storeShopInfo.isPost() ? [] : storeShopInfo.getShopInfo().menuItem
+  isPost.value
+    ? []
+    : Object.values(storeShopInfo.getEditShopInfo().menuList).flat()
 );
-
 const errMessage = ref("");
 const isError = ref(false);
 const menuItems = getMenuItems();
+const shopRegisterTransfer = new ShopRegisterTransfer();
+const shopDeleteTransfer = new ShopDeleteTransfer();
 
 const prefectures = [
   "北海道",
@@ -128,6 +153,33 @@ const prefectures = [
   "鹿児島県",
   "沖縄県",
 ];
+const emit = defineEmits<{
+  (
+    e: "showConfirm",
+    type: ElMessageBoxType,
+    title: string,
+    message: string,
+    confirmLabel: string,
+    cancelLabel: string,
+    callback: () => void
+  ): void;
+  (
+    e: "showMessageBox",
+    type: ElMessageBoxType,
+    title: string,
+    message: string
+  ): void;
+  (
+    e: "showErrorMessageWithCallBack",
+    type: ElMessageBoxType,
+    title: string,
+    message: string,
+    callback: () => void
+  ): void;
+  (e: "toOtherPage", pageName: string): void;
+  (e: "showLoading"): void;
+  (e: "hideLoading"): void;
+}>();
 
 const loader = new Loader({
   apiKey,
@@ -141,7 +193,7 @@ const inputValidate = () => {
     errMessage.value = "Menuは最低1つ選択してください。";
   if (streetName.value === "") errMessage.value = "番地を入力してください。";
   if (cityName.value === "") errMessage.value = "市区町村を入力してください。";
-  if (prefacture.value === "")
+  if (prefecture.value === "")
     errMessage.value = "都道府県を入力してください。";
   if (shopName.value === "")
     errMessage.value = "お店の名前を入力してください。";
@@ -150,8 +202,7 @@ const inputValidate = () => {
 
 const getCoordinates = async () => {
   // addressを組み立てる
-  address.value = `${prefacture.value}${cityName.value}${streetName.value}`;
-  console.log("address.value:", address.value);
+  address.value = `${prefecture.value}${cityName.value}${streetName.value}`;
 
   if (!address.value) {
     errMessage.value = "住所を入力してください";
@@ -195,18 +246,58 @@ const getCoordinates = async () => {
   }
 };
 
+const returnHome = () => {
+  router.push({ name: "howto" });
+};
+
+const returnList = () => {
+  router.push({ name: "list" });
+};
+
 const onSubmit = async () => {
   console.log(checkBoxValue.value);
   if (inputValidate()) return;
+
+  emit("showLoading");
   await getCoordinates();
 
   shopInfo.value = ShopInfo.of(
-    Shop.of(0, shopName.value, location.latitude, location.longitude),
-    Address.of(prefacture.value, cityName.value, streetName.value),
+    Shop.of(shopId.value, shopName.value),
+    Address.of(
+      prefecture.value,
+      cityName.value,
+      streetName.value,
+      location.latitude,
+      location.longitude
+    ),
     checkBoxValue.value
   );
-  console.log("shopInfo:", shopInfo.value);
-  return;
+  try {
+    if (!isPost.value) await shopDeleteTransfer.deleteShop(shopId.value);
+    await await shopRegisterTransfer.registerShop(shopInfo.value);
+
+    emit(
+      "showMessageBox",
+      ElMessageBoxType.INFO,
+      isPost.value ? "登録成功" : "更新成功",
+      isPost.value
+        ? `${shopName.value}を登録しました`
+        : "お店の情報を更新しました"
+    );
+    returnList();
+  } catch (error) {
+    emit(
+      "showErrorMessageWithCallBack",
+      ElMessageBoxType.ERROR,
+      isPost.value ? "登録失敗" : "更新失敗",
+      isPost.value
+        ? `登録できませんでした<br>エラー原因：${error}`
+        : `更新できませんでした<br>エラー原因：${error}`,
+      returnHome
+    );
+  } finally {
+    emit("hideLoading");
+  }
 };
 </script>
 
@@ -272,6 +363,13 @@ const onSubmit = async () => {
       width: 200px;
       border-radius: 30px;
       color: white;
+    }
+  }
+  .editBtnArea {
+    display: flex;
+    max-width: 400px;
+    .editBtn {
+      width: 48%;
     }
   }
   h3 {

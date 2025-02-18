@@ -6,10 +6,10 @@ import Post from "@/presentation/views/Post.vue";
 import List from "@/presentation/views/List.vue";
 
 const routes = [
-  { path: "/", component: Howto },
-  { path: "/search", component: Search },
-  { path: "/post", component: Post },
-  { path: "/list", component: List },
+  { path: "/howto", name: "howto", component: Howto },
+  { path: "/search", name: "search", component: Search },
+  { path: "/post", name: "post", component: Post },
+  { path: "/list", name: "list", component: List },
 ];
 
 const router = createRouter({

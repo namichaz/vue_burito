@@ -8,14 +8,14 @@ export default class ShopListTransfer {
     let shopList: ShopInfo[] = new Array(ShopInfo.empty());
     try {
       const response = await axios
-        .get("/info/shops")
+        .get("/shops/info")
         .catch((error: { response: any }) => error.response);
 
       const statusCode = new HttpStatus(response.status);
       if (statusCode.isSuccess() && response.data) {
         const shopListResponse: ShopListResponse = response.data;
         shopList = shopListResponse.shopList.map((shop) =>
-          ShopInfo.of(shop.shop, shop.address, shop.menuItem)
+          ShopInfo.of(shop.shop, shop.address, shop.menuList)
         );
       } else if (statusCode.isError()) {
         console.error("shoplist is not an array or not found");
