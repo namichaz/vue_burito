@@ -10,6 +10,7 @@ export default class ShopDeleteTransfer {
         .catch((error: { response: any }) => error.response);
 
       const statusCode = new HttpStatus(response.status);
+      console.log("statusCode=", statusCode);
       if (statusCode.isSuccess()) {
         console.log("Delete Success");
       } else if (statusCode.isSessionInvalid()) {

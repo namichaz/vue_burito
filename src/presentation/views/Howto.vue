@@ -1,7 +1,7 @@
 <template>
   <div id="howto">
     <div class="pa-12">
-      <h1>How to</h1>
+      <h1>How To</h1>
       <p class="text">
         Where's my best
         burrito!?はあなただけの最高のブリトーを見つける為のサービスです！
@@ -12,8 +12,8 @@
       <div class="icon"><img :src="search" alt="search" /></div>
       <h2>1. お店を検索してみよう</h2>
       <p class="text">
-        まずは、ページ下部の「Search」ボタンから、スポットを検索・閲覧してみましょう。
-        スポットの検索方法は、「現在地から検索」と「住所・スポット名から検索」の二種類。
+        まずは、ページ下部の「Search」ボタンから、お店を検索・閲覧してみましょう。
+        お店の検索方法は、「現在地から検索」と「住所・地名などから検索」の二種類。
       </p>
     </div>
     <div class="explain">
@@ -27,7 +27,7 @@
       <div class="icon"><img :src="plus" alt="search" /></div>
       <h2>3. 新しいお店を登録しよう</h2>
       <p class="text">
-        ページ下部の「Post」ボタンから、新しく見つけたお店を登録してみましょう。
+        ページ下部の「Add」ボタンから、新しく見つけたお店を登録してみましょう。
       </p>
     </div>
   </div>

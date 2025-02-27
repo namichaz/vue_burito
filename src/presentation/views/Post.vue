@@ -1,6 +1,6 @@
 <template>
   <div id="post">
-    <h1>{{ isPost ? "Post" : "Edit" }}</h1>
+    <h1>{{ isPost ? "Add New Shop" : "Edit Shop" }}</h1>
     <div class="inputArea">
       <h3>Shop Name</h3>
       <input type="text" placeholder="お店の名前" v-model="shopName" />
@@ -358,6 +358,7 @@ const onSubmit = async () => {
   .btnArea {
     gap: 10px;
     padding: 30px;
+    margin: auto;
     button {
       background-color: lightgray;
       width: 200px;
@@ -368,6 +369,7 @@ const onSubmit = async () => {
   .editBtnArea {
     display: flex;
     max-width: 400px;
+    margin: auto;
     .editBtn {
       width: 48%;
     }

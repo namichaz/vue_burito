@@ -51,7 +51,7 @@
         </li>
         <li @click="toOtherPage('post')">
           <img :src="plus" alt="" />
-          <p>Post</p>
+          <p>Add</p>
         </li>
       </ul>
     </nav>
@@ -282,6 +282,9 @@ footer {
       width: 25px;
     }
   }
+}
+.el-popup-parent--hidden {
+  width: 100% !important;
 }
 .el-overlay-message-box {
   .el-message-box {

@@ -1,5 +1,6 @@
 <template>
   <div class="pa-5 search">
+    <h1 class="pa-5">Search</h1>
     <div class="inputArea">
       <input
         v-model="searchQuery"
@@ -167,6 +168,7 @@ onMounted(async () => {
           url: burrito, // SVGのURLを指定
           scaledSize: new google.maps.Size(40, 40), // アイコンのサイズを指定
         } as google.maps.Icon,
+        animation: google.maps.Animation.DROP,
       });
     } else {
       // 現在地にマーカーを設定
@@ -289,29 +291,6 @@ const searchLocation = () => {
           const location = results[0].geometry!.location;
           map.setCenter(location!); // マップをその位置に移動
           map.setZoom(15); // ズームレベルを設定
-
-          // 新しいマーカーを追加
-          // const newMarker = new google.maps.Marker({
-          //   map: map,
-          //   position: location,
-          //   title: results[0].name,
-          // });
-
-          // 新しいマーカーにクリックイベントを追加
-          // newMarker.addListener("click", () => {
-          //   infoWindow.setContent(
-          //     `<div style="color: black;width:auto; height:50px;"><strong>${results[0].name}</strong>`
-          //   );
-          //   infoWindow.open(map, newMarker);
-          // });
-
-          // 既存のマーカーも表示したまま;
-          // markers.forEach((existingMarker) => {
-          //   existingMarker.setMap(map); // 既存のマーカーを表示
-          // });
-
-          // 新しいマーカーを追加
-          // markers.push(newMarker);
         } else {
           alert("場所が見つかりませんでした。");
         }
