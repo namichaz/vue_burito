@@ -22,6 +22,22 @@
     </div>
   </header>
   <v-app>
+    <v-btn-toggle group v-model="selectedLang">
+      <v-btn
+        :value="ELanguageType.JAJP"
+        :class="{ 'inactive-btn': selectedLang !== ELanguageType.JAJP }"
+        selected
+      >
+        JA</v-btn
+      >
+      <v-btn
+        :value="ELanguageType.ENUS"
+        :class="{ 'inactive-btn': selectedLang !== ELanguageType.ENUS }"
+      >
+        EN
+      </v-btn>
+    </v-btn-toggle>
+
     <v-main id="main" class="px-5">
       <router-view
         @showLoading="showLoading"
@@ -69,10 +85,13 @@ import ElMessageBoxType from "@/domain/model/lang/ElMessageBoxType";
 import "element-plus/dist/index.css";
 import { LoadingInstance } from "element-plus/es/components/loading/src/loading";
 import { useLoadingStore } from "@/infrastructure/store/LoadingStore";
-import { nextTick, onMounted, ref } from "vue";
+import { nextTick, onMounted, ref, watch } from "vue";
 import ShopListTransfer from "@/infrastructure/network/shop/ShopListTransfer";
 import ShopInfo from "@/domain/model/shop/ShopInfo";
 import { useShopInfoStore } from "@/infrastructure/store/ShopInfoStore";
+import ELanguageType from "@/domain/model/lang/ELanguageType";
+import { useLanguageStore } from "@/infrastructure/store/LanguageStore";
+import { useI18n } from "vue-i18n";
 
 const router = useRouter();
 const storeLoading = useLoadingStore();
@@ -80,20 +99,10 @@ let loadingInstance: LoadingInstance | null = null;
 const shopList = ref<ShopInfo[]>([]);
 const shopListTransfer = new ShopListTransfer();
 const storeShopInfo = useShopInfoStore();
-
-onMounted(async () => {
-  try {
-    shopList.value = await shopListTransfer.getShopList();
-    if (shopList.value.length === 0) return;
-    storeShopInfo.setShopInfos(shopList.value);
-  } catch (error) {
-    console.error("店舗情報の取得エラー:", error);
-  } finally {
-    nextTick(() => {
-      window.scrollTo(0, 0);
-    });
-  }
-});
+const storeLanguage = useLanguageStore();
+const languageList = ref<ELanguageType[]>([]);
+const { t, locale } = useI18n();
+const selectedLang = ref<ELanguageType | null>(ELanguageType.JAJP);
 
 const showLoading = () => {
   console.log("showloading");
@@ -208,6 +217,92 @@ const toOtherPage = async (pageName: string, shopInfo?: ShopInfo) => {
     console.error("Navigation error:", error);
   }
 };
+
+const createLanguageList = () => {
+  if (router.currentRoute.value.name !== "top") {
+    languageList.value.push(ELanguageType.JAJP);
+    languageList.value.push(ELanguageType.ENUS);
+  }
+};
+
+const queryLanguage = () => {
+  const queryParams = new URLSearchParams(window.location.search);
+  const queryLang = queryParams.get("lang");
+  if (!queryLang) return ELanguageType.NONE;
+  const lang = Array.isArray(queryLang)
+    ? queryLang[0]!.replace("-", "").toLoweCase()
+    : queryLang!.replace("-", "").toLowerCase();
+  if (lang === ELanguageType.JAJP) return ELanguageType.JAJP;
+  if (lang === ELanguageType.ENUS) return ELanguageType.ENUS;
+  return ELanguageType.ENUS;
+};
+
+const changeLanguage = (lang: ELanguageType) => {
+  // 言語を変更
+  storeLanguage.setLanguage(lang);
+  const description = t("header.meta_description").toString();
+  document
+    .querySelector('meta[name="description"]')
+    ?.setAttribute("content", description);
+  const keywords = t("header.meta_keywords").toString();
+  document
+    .querySelector('meta[name="keywords"]')
+    ?.setAttribute("content", keywords);
+  document.title =
+    router.currentRoute.value.name === "top"
+      ? t("top.page_title").toString().split("&nbsp;").join(" ")
+      : t("common.page_title").toString().split("&nbsp;").join(" ");
+
+  // 言語を反映させる
+  locale.value = lang;
+};
+
+const acceptLanguage = () => {
+  if (navigator.language) {
+    for (const lang of navigator.languages) {
+      if (lang.indexOf("ja") === 0) return ELanguageType.JAJP;
+      if (lang.indexOf("en") === 0) return ELanguageType.ENUS;
+    }
+  } else {
+    const lang = navigator.language;
+    if (lang.indexOf("ja") === 0) return ELanguageType.JAJP;
+    if (lang.indexOf("en") === 0) return ELanguageType.ENUS;
+  }
+  return ELanguageType.ENUS;
+};
+
+watch(selectedLang, (newLang) => {
+  if (newLang) {
+    changeLanguage(newLang);
+  }
+});
+
+const initLanguage = () => {
+  createLanguageList();
+  storeLanguage.load();
+  if (storeLanguage.language() !== ELanguageType.NONE)
+    return changeLanguage(storeLanguage.language());
+  const queryLanguageValue = queryLanguage();
+  if (queryLanguageValue !== ELanguageType.NONE)
+    return changeLanguage(queryLanguageValue);
+  changeLanguage(acceptLanguage());
+};
+
+initLanguage();
+
+onMounted(async () => {
+  try {
+    shopList.value = await shopListTransfer.getShopList();
+    if (shopList.value.length === 0) return;
+    storeShopInfo.setShopInfos(shopList.value);
+  } catch (error) {
+    console.error("店舗情報の取得エラー:", error);
+  } finally {
+    nextTick(() => {
+      window.scrollTo(0, 0);
+    });
+  }
+});
 </script>
 
 <style lang="scss" scope>
@@ -219,6 +314,26 @@ header {
   position: sticky;
   top: 0;
   z-index: 100;
+}
+.v-btn-toggle {
+  right: 0;
+  top: 0;
+  position: absolute;
+  background-color: transparent;
+  .v-btn {
+    background-color: transparent;
+    color: white;
+  }
+  .inactive-btn {
+    color: rgba(0, 0, 0, 0.4) !important; /* 薄く表示 */
+    opacity: 0.6 !important; /* 薄く見せる */
+  }
+  .v-btn--active {
+    background-color: transparent !important;
+    .v-btn__overlay {
+      opacity: 0 !important;
+    }
+  }
 }
 .loop-wrap {
   display: flex;
@@ -252,6 +367,7 @@ header {
   display: grid;
   justify-content: center;
   color: white;
+  padding-top: 20px;
   @media (max-width: 400px), (max-height: 400px) {
     height: auto;
   }

@@ -1,6 +1,6 @@
 <template>
   <div id="post">
-    <h1>Shop List</h1>
+    <h1 v-html="t('list.page_title')" />
     <div id="cardArea" v-if="isShowList()">
       <Card
         v-for="(shopInfo, index) in shopInfos"
@@ -31,7 +31,9 @@ import ShopDeleteTransfer from "@/infrastructure/network/shop/ShopDeleteTransfer
 import ShopListTransfer from "@/infrastructure/network/shop/ShopListTransfer";
 import ShopInfo from "@/domain/model/shop/ShopInfo";
 import router from "@/router";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const storeShopInfo = useShopInfoStore();
 const shopDeleteTransfer = new ShopDeleteTransfer();
 const shopListTransfer = new ShopListTransfer();
@@ -101,10 +103,12 @@ const execDelete = (shopId: number, shop_name: string) => {
   emit(
     "showConfirm",
     ElMessageBoxType.WARNING,
-    "削除確認",
-    `${shop_name}を削除してもよろしいですか？`,
-    "削除する",
-    "キャンセル",
+    t("list.confirm_delete").toString(),
+    t("list.confirm_delete_description", {
+      shopName: shop_name,
+    }).toString(),
+    t("list.delete").toString(),
+    t("list.cancel").toString(),
     async () => {
       await deleteShopCard(shopId, shop_name);
     }
@@ -118,8 +122,8 @@ const deleteShopCard = async (shopId: number, shop_name: string) => {
     emit(
       "showMessageBox2",
       ElMessageBoxType.INFO,
-      "削除成功",
-      `${shop_name}を削除しました`,
+      t("list.delete_success").toString(),
+      t("list.delete_success_description", { shopName: shop_name }).toString(),
       "OK",
       async () => {
         window.location.reload();
@@ -129,8 +133,8 @@ const deleteShopCard = async (shopId: number, shop_name: string) => {
     emit(
       "showErrorMessageWithCallBack",
       ElMessageBoxType.ERROR,
-      "削除失敗",
-      `削除できませんでした<br>エラー内容：${e}`,
+      t("list.delete_faild").toString(),
+      t("list.delete_faild_description", { error: e }).toString(),
       returnHome
     );
   } finally {
@@ -143,10 +147,12 @@ const execEdit = (shopInfo: ShopInfo) => {
   emit(
     "showConfirm",
     ElMessageBoxType.INFO,
-    "編集確認",
-    `${shopInfo.shop.shop_name}の情報を編集しますか？`,
-    "編集する",
-    "キャンセル",
+    t("list.confirm_edit").toString(),
+    t("list.confirm_edit_description", {
+      shopName: shopInfo.shop.shop_name,
+    }).toString(),
+    t("list.edit").toString(),
+    t("list.cancel"),
     () => {
       storeShopInfo.setEditShopInfo(shopInfo);
       emit("toOtherPage", "post");

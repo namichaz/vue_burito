@@ -1,0 +1,66 @@
+{
+  "common": {},
+  "howto": {
+    "page_title": "How to Use",
+    "description": "Where's my best burrito!? is a service to help you find your perfect burrito! <br> Once you discover a delicious burrito shop, register it on the map and share it with everyone!",
+    "first_step": "1. Search for a burrito shop",
+    "second_step": "2. Browse the burrito shop list",
+    "third_step": "3. Register a new burrito shop",
+    "first_step_description": "First, try searching and browsing burrito shops by clicking the 'Search' button at the bottom of the page. <br> You can search for burrito shops by either 'current location' or 'address/place name'.",
+    "second_step_description": "Click the 'List' button at the bottom of the page to view all registered burrito shops. <br> You can also check out the food services that each shop offers.",
+    "third_step_description": "Click the 'Add' button at the bottom of the page to register a new burrito shop you've found."
+  },
+  "post": {
+    "page_title_add": "Register a Burrito Shop",
+    "page_title_edit": "Edit Burrito Shop Information",
+    "subtitle_shopName": "Burrito Shop Name",
+    "subtitle_address": "Address",
+    "subtitle_menu": "Menu",
+    "prefecture": "Prefecture",
+    "city": "City",
+    "street": "Street",
+    "return": "Back",
+    "register": "Register",
+    "update": "Update",
+    "register_success": "Registration Successful",
+    "update_success": "Update Successful",
+    "register_shopName": "{shopName} has been registered.",
+    "update_shopInfo": "Burrito shop information has been updated.",
+    "register_faild": "Registration Failed",
+    "update_faild": "Update Failed",
+    "register_faild_description": "Failed to register.<br>Error reason: {error}",
+    "update_faild_description": "Failed to update.<br>Error reason: {error}",
+    "error_message": {
+      "not_selected_menu": "Please select at least one menu item.",
+      "not_entered_street": "Please enter the street number.",
+      "not_entered_city": "Please enter the city.",
+      "not_entered_prefecture": "Please enter the prefecture.",
+      "not_entered_shopName": "Please enter the burrito shop name.",
+      "not_entered_address": "Please enter the address.",
+      "not_correct_address": "The address is incorrect.",
+      "errro_occurred": "Oops! Something went wrong."
+    }
+  },
+  "list": {
+    "page_title": "Burrito Shop List",
+    "confirm_edit": "Edit Confirmation",
+    "confirm_delete": "Delete Confirmation",
+    "confirm_edit_description": "Would you like to edit the information for {shopName}?",
+    "confirm_delete_description": "Would you like to delete the information for {shopName}?",
+    "delete_success_description": "{shopName} has been deleted.",
+    "delete_faild_description": "Failed to delete.<br>Error details: {error}",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "delete_success": "Delete Successful",
+    "delete_faild": "Delete Failed"
+  },
+  "search": {
+    "page_title": "Burrito Shop Search",
+    "enter_keywords": "Enter keywords",
+    "cant_get_current_place": "We couldn't fetch your current location.",
+    "please_enter_keywords": "Please enter search keywords.",
+    "nothing_location": "No location found.",
+    "return_to_current_location": "Back to current location"
+  }
+}

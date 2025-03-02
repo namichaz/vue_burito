@@ -1,0 +1,66 @@
+{
+  "common": {},
+  "howto": {
+    "page_title": "使い方",
+    "description": "Where's my best burrito!?はあなただけの最高のブリトーを見つける為のサービスです！<br>美味しいブリトー屋さんを発見したら地図に登録してみんなにシェアしましょう！",
+    "first_step": "1. お店を検索してみよう",
+    "second_step": "2. 一覧でお店を調べよう",
+    "third_step": "3. 新しいお店を登録しよう",
+    "first_step_description": "まずは、ページ下部の「Search」ボタンから、お店を検索・閲覧してみましょう。<br>お店の検索方法は、「現在地から検索」と「住所・地名などから検索」の二種類。",
+    "second_step_description": "ページ下部の「List」ボタンから、現在登録されているすべてのお店の情報を閲覧することができます。<br>また、そのお店が提供してるフードサービスが確認できます。",
+    "third_step_description": "ページ下部の「Add」ボタンから、新しく見つけたお店を登録してみましょう。"
+  },
+  "post": {
+    "page_title_add": "お店の登録",
+    "page_title_edit": "お店の情報編集",
+    "subtitle_shopName": "お店の名前",
+    "subtitle_address": "住所",
+    "subtitle_menu": "メニュー",
+    "prefecture": "都道府県",
+    "city": "市区町村",
+    "street": "番地",
+    "return": "もどる",
+    "register": "登録",
+    "update": "更新",
+    "register_success": "登録成功",
+    "update_success": "更新成功",
+    "register_shopName": "{shopName}を登録しました。",
+    "update_shopInfo": "お店の情報を更新しました。",
+    "register_faild": "登録失敗",
+    "update_faild": "更新失敗",
+    "register_faild_description": "登録できませんでした<br>エラー原因：{error}",
+    "update_faild_description": "更新できませんでした<br>エラー原因：{error}",
+    "error_message": {
+      "not_selected_menu": "Menuは最低1つ選択してください。",
+      "not_entered_street": "番地を入力してください。",
+      "not_entered_city": "市区町村を入力してください。",
+      "not_entered_prefecture": "都道府県を入力してください。",
+      "not_entered_shopName": "お店の名前を入力してください。",
+      "not_entered_address": "住所を入力してください。",
+      "not_correct_address": "住所が正しくありません。",
+      "errro_occurred": "エラーが発生しました。"
+    }
+  },
+  "list": {
+    "page_title": "お店一覧",
+    "confirm_edit": "編集確認",
+    "confirm_delete": "削除確認",
+    "confirm_edit_description": "{shopName}の情報を編集しますか？",
+    "confirm_delete_description": "{shopName}の情報を削除しますか？",
+    "delete_success_description": "{shopName}を削除しました。",
+    "delete_faild_description": "削除できませんでした。<br>エラー内容：{error}",
+    "edit": "編集する",
+    "cancel": "キャンセル",
+    "delete": "削除する",
+    "delete_success": "削除成功",
+    "delete_faild": "削除失敗"
+  },
+  "search": {
+    "page_title": "お店の検索",
+    "enter_keywords": "キーワードを入力",
+    "cant_get_current_place": "現在地が取得できませんでした。",
+    "please_enter_keywords": "検索キーワードを入力してください。",
+    "nothing_location": "場所が見つかりませんでした。",
+    "return_to_current_location": "現在地に戻る"
+  }
+}

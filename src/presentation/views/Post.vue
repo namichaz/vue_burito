@@ -1,25 +1,37 @@
 <template>
   <div id="post">
-    <h1>{{ isPost ? "Add New Shop" : "Edit Shop" }}</h1>
+    <h1>
+      {{
+        isPost ? t("post.page_title_add").toString() : t("post.page_title_edit")
+      }}
+    </h1>
     <div class="inputArea">
-      <h3>Shop Name</h3>
-      <input type="text" placeholder="お店の名前" v-model="shopName" />
+      <h3 v-html="t('post.subtitle_shopName')" />
+      <input
+        type="text"
+        :placeholder="t('post.subtitle_shopName')"
+        v-model="shopName"
+      />
     </div>
     <div class="inputArea">
-      <h3>Adress</h3>
+      <h3 v-html="t('post.subtitle_address')" />
       <v-select
         v-model="prefecture"
-        label="都道府県"
-        :items="prefectures"
+        :label="t('post.prefecture')"
+        :items="
+          storeLanguage.language() == ELanguageType.JAJP
+            ? prefectures_ja
+            : prefectures_en
+        "
         variant="solo-filled"
         density="compact"
         bg-color="lightgray"
       ></v-select>
-      <input type="text" placeholder="市区町村" v-model="cityName" />
-      <input type="text" placeholder="番地" v-model="streetName" />
+      <input type="text" :placeholder="t('post.city')" v-model="cityName" />
+      <input type="text" :placeholder="t('post.street')" v-model="streetName" />
     </div>
     <div class="checkBoxArea">
-      <h3>Menu</h3>
+      <h3 v-html="t('post.subtitle_menu')" />
       <v-row no-gutters>
         <v-col cols="6" v-for="item in menuItems" :key="item.value">
           <div class="checkbox-item">
@@ -41,16 +53,17 @@
         :class="{ editBtn: !isPost }"
         variant="elevated"
         @click="returnList"
-      >
-        もどる
-      </v-btn>
+        v-html="t('post.return')"
+      />
       <v-btn
         class="initButton"
         :class="{ editBtn: !isPost }"
         variant="elevated"
         @click="onSubmit"
       >
-        {{ isPost ? "登録" : "更新" }}
+        {{
+          isPost ? t("post.register").toString() : t("post.update").toString()
+        }}
       </v-btn>
     </div>
   </div>
@@ -60,6 +73,7 @@
 import { computed, ref } from "vue";
 import { getMenuItems, MenuItem } from "@/domain/model/shop/MenuItem";
 import { useShopInfoStore } from "@/infrastructure/store/ShopInfoStore";
+import { useLanguageStore } from "@/infrastructure/store/LanguageStore";
 import { Loader } from "@googlemaps/js-api-loader";
 import Shop from "@/domain/model/shop/Shop";
 import ShopInfo from "@/domain/model/shop/ShopInfo";
@@ -68,14 +82,17 @@ import ShopRegisterTransfer from "@/infrastructure/network/shop/ShopRegisterTran
 import ElMessageBoxType from "@/domain/model/lang/ElMessageBoxType";
 import router from "@/router";
 import ShopDeleteTransfer from "@/infrastructure/network/shop/ShopDeleteTransfer";
-import { nextTick } from "process";
+import { useI18n } from "vue-i18n";
+import ELanguageType from "@/domain/model/lang/ELanguageType";
 
+const { t } = useI18n();
 const apiKey = import.meta.env.VITE_GMAP_APIKEY;
 const address = ref("");
 const latitude = ref(0);
 const longitude = ref(0);
 let location = { latitude: 0, longitude: 0 };
 const storeShopInfo = useShopInfoStore();
+const storeLanguage = useLanguageStore();
 const isPost = computed(() => storeShopInfo.isPost());
 const shopInfo = ref(ShopInfo.empty());
 const shopId = ref(
@@ -104,7 +121,7 @@ const menuItems = getMenuItems();
 const shopRegisterTransfer = new ShopRegisterTransfer();
 const shopDeleteTransfer = new ShopDeleteTransfer();
 
-const prefectures = [
+const prefectures_ja = [
   "北海道",
   "青森県",
   "岩手県",
@@ -153,6 +170,57 @@ const prefectures = [
   "鹿児島県",
   "沖縄県",
 ];
+
+const prefectures_en = [
+  "Hokkaido",
+  "Aomori",
+  "Iwate",
+  "Miyagi",
+  "Akita",
+  "Yamagata",
+  "Fukushima",
+  "Ibaraki",
+  "Tochigi",
+  "Gunma",
+  "Saitama",
+  "Chiba",
+  "Tokyo",
+  "Kanagawa",
+  "Niigata",
+  "Toyama",
+  "Ishikawa",
+  "Fukui",
+  "Yamanashi",
+  "Nagano",
+  "Gifu",
+  "Shizuoka",
+  "Aichi",
+  "Mie",
+  "Shiga",
+  "Kyoto",
+  "Osaka",
+  "Hyogo",
+  "Nara",
+  "Wakayama",
+  "Tottori",
+  "Shimane",
+  "Okayama",
+  "Hiroshima",
+  "Yamaguchi",
+  "Tokushima",
+  "Kagawa",
+  "Ehime",
+  "Kochi",
+  "Fukuoka",
+  "Saga",
+  "Nagasaki",
+  "Kumamoto",
+  "Oita",
+  "Miyazaki",
+  "Kagoshima",
+  "Okinawa",
+];
+
 const emit = defineEmits<{
   (
     e: "showConfirm",
@@ -190,13 +258,17 @@ const loader = new Loader({
 const inputValidate = () => {
   errMessage.value = "";
   if (checkBoxValue.value.length === 0)
-    errMessage.value = "Menuは最低1つ選択してください。";
-  if (streetName.value === "") errMessage.value = "番地を入力してください。";
-  if (cityName.value === "") errMessage.value = "市区町村を入力してください。";
+    errMessage.value = t("post.error_message.not_selected_menu").toString();
+  if (streetName.value === "")
+    errMessage.value = t("post.error_message.not_entered_street").toString();
+  if (cityName.value === "")
+    errMessage.value = t("post.error_message.not_entered_city").toString();
   if (prefecture.value === "")
-    errMessage.value = "都道府県を入力してください。";
+    errMessage.value = t(
+      "post.error_message.not_entered_prefecture"
+    ).toString();
   if (shopName.value === "")
-    errMessage.value = "お店の名前を入力してください。";
+    errMessage.value = t("post.error_message.not_entered_shopName").toString();
   if (errMessage.value !== "") return (isError.value = true);
 };
 
@@ -205,7 +277,7 @@ const getCoordinates = async () => {
   address.value = `${prefecture.value}${cityName.value}${streetName.value}`;
 
   if (!address.value) {
-    errMessage.value = "住所を入力してください";
+    errMessage.value = t("post.error_message.not_entered_address").toString();
     latitude.value = 0;
     longitude.value = 0;
     return;
@@ -222,7 +294,9 @@ const getCoordinates = async () => {
         if (status === "OK") {
           resolve(results!);
         } else {
-          reject(new Error("住所が正しくありません"));
+          reject(
+            new Error(t("post.error_message.not_correct_address").toString())
+          );
         }
       });
     });
@@ -234,7 +308,8 @@ const getCoordinates = async () => {
     isError.value = false;
   } catch (error: any) {
     console.error(error);
-    errMessage.value = error.message || "エラーが発生しました";
+    errMessage.value =
+      error.message || t("post.error_message.errro_occurred").toString();
     latitude.value = 0;
     longitude.value = 0;
     isError.value = true;
@@ -279,20 +354,24 @@ const onSubmit = async () => {
     emit(
       "showMessageBox",
       ElMessageBoxType.INFO,
-      isPost.value ? "登録成功" : "更新成功",
       isPost.value
-        ? `${shopName.value}を登録しました`
-        : "お店の情報を更新しました"
+        ? t("post.register_success").toString()
+        : t("post.update_success").toString(),
+      isPost.value
+        ? t("post.register_shopName", { shopName: shopName.value }).toString()
+        : t("post.update_shopInfo").toString()
     );
     returnList();
   } catch (error) {
     emit(
       "showErrorMessageWithCallBack",
       ElMessageBoxType.ERROR,
-      isPost.value ? "登録失敗" : "更新失敗",
       isPost.value
-        ? `登録できませんでした<br>エラー原因：${error}`
-        : `更新できませんでした<br>エラー原因：${error}`,
+        ? t("post.register_faild").toString()
+        : t("post.update_faild").toString(),
+      isPost.value
+        ? t("post.register_faild_description", { error: error }).toString()
+        : t("post.update_faild_description", { error: error }).toString(),
       returnHome
     );
   } finally {

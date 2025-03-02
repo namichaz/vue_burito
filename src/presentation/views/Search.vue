@@ -1,11 +1,11 @@
 <template>
   <div class="pa-5 search">
-    <h1 class="pa-5">Search</h1>
+    <h1 class="pa-5" v-html="t('search.page_title')" />
     <div class="inputArea">
       <input
         v-model="searchQuery"
         type="text"
-        placeholder="キーワードを入力"
+        :placeholder="t('search.enter_keywords')"
         @keyup.enter="searchLocation"
       />
       <button @click="searchLocation" type="button" aria-label="検索"></button>
@@ -16,9 +16,8 @@
         class="initButton"
         variant="elevated"
         @click="moveToCurrentLocation"
-      >
-        現在地に戻る
-      </v-btn>
+        v-html="t('search.return_to_current_location')"
+      />
     </div>
   </div>
 </template>
@@ -30,7 +29,9 @@ import { useMapInfoStore } from "@/infrastructure/store/MapInfoStore";
 import ShopInfo from "@/domain/model/shop/ShopInfo";
 import burrito from "@/presentation/assets/burrito.svg";
 import ShopListTransfer from "@/infrastructure/network/shop/ShopListTransfer";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const storeShopInfo = useShopInfoStore();
 const storeMapInfo = useMapInfoStore();
 const shopListTransfer = new ShopListTransfer();
@@ -140,7 +141,7 @@ onMounted(async () => {
     position = await getCurrentLocation();
 
     if (!position) {
-      throw new Error("現在地が取得できませんでした");
+      throw new Error(t("search.cant_get_current_place").toString());
     }
 
     const lnt = storeShopInfo.getLongitude();
@@ -267,7 +268,7 @@ onMounted(async () => {
 const searchLocation = () => {
   console.log("search");
   if (searchQuery.value.trim() === "") {
-    alert("検索キーワードを入力してください");
+    alert(t("search.please_enter_keywords").toString());
     return;
   }
   const request = {
@@ -292,7 +293,7 @@ const searchLocation = () => {
           map.setCenter(location!); // マップをその位置に移動
           map.setZoom(15); // ズームレベルを設定
         } else {
-          alert("場所が見つかりませんでした。");
+          alert(t("search.nothing_location").toString());
         }
 
         setTimeout(() => {
