@@ -238,6 +238,14 @@ const emit = defineEmits<{
     message: string
   ): void;
   (
+    e: "showMessageBox2",
+    type: ElMessageBoxType,
+    title: string,
+    message: string,
+    confirmLabel: string,
+    callback: () => void
+  ): void;
+  (
     e: "showErrorMessageWithCallBack",
     type: ElMessageBoxType,
     title: string,
@@ -349,17 +357,21 @@ const onSubmit = async () => {
   );
   try {
     if (!isPost.value) await shopDeleteTransfer.deleteShop(shopId.value);
-    await await shopRegisterTransfer.registerShop(shopInfo.value);
+    await shopRegisterTransfer.registerShop(shopInfo.value);
 
     emit(
-      "showMessageBox",
+      "showMessageBox2",
       ElMessageBoxType.INFO,
       isPost.value
         ? t("post.register_success").toString()
         : t("post.update_success").toString(),
       isPost.value
         ? t("post.register_shopName", { shopName: shopName.value }).toString()
-        : t("post.update_shopInfo").toString()
+        : t("post.update_shopInfo").toString(),
+      "OK",
+      async () => {
+        window.location.reload();
+      }
     );
     returnList();
   } catch (error) {

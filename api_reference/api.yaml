@@ -1,8 +1,8 @@
 openapi: 3.0.0
 info:
-  title: ブリトー屋さんの場所管理 API
+  title: ブリトー屋さんの検索 API
   version: 1.0.0
-  description: 登録されてる店舗情報の取得、登録、更新、削除をする。
+  description: 登録されてる店舗情報の取得、登録、削除をする。
 paths:
   /shops/info:
     get:
@@ -87,7 +87,7 @@ paths:
                 code: 500
                 message: Internal Server Error
     post:
-      summary: 新しい店の情報を追加
+      summary: 新しい店の情報を登録
       description: ブリトー屋さんの情報を新規登録
       requestBody:
         required: true
@@ -96,9 +96,6 @@ paths:
             schema:
               type: object
               properties:
-                shop_id:
-                  type: integer
-                  example: 1
                 shop_name:
                   type: string
                   example: Elsocalo Burito
@@ -165,78 +162,6 @@ paths:
         required: true
         schema:
           type: integer
-    put:
-      summary: idで指定した店の情報を更新
-      description: 該当の店の情報を更新する。
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                shop_id:
-                  type: integer
-                  example: 1
-                shop_name:
-                  type: string
-                  example: Elsocalo Burito
-                longitude:
-                  type: number
-                  format: float
-                  example: 139.6917
-                latitude:
-                  type: number
-                  format: float
-                  example: 35.6895
-                prefecture:
-                  type: string
-                  example: 大阪府
-                city:
-                  type: string
-                  example: 大阪市北区
-                street:
-                  type: string
-                  example: 豊崎３丁目１９−３
-                menu_list:
-                  type: string
-                  example: nachos,tacos,guacamole
-      responses:
-        "200":
-          description: 更新成功
-          content:
-            application/json:
-              example:
-                code: 200
-                message: "Success"
-        "400":
-          description: パラメータ不正
-          content:
-            application/json:
-              example:
-                code: 400
-                message: Bad Request
-        "404":
-          description: お店が見つからない
-          content:
-            application/json:
-              example:
-                code: 404
-                message: Not Found
-        "408":
-          description: タイムアウト
-          content:
-            application/json:
-              example:
-                code: 408
-                message: Request Timeout
-        "500":
-          description: サーバーエラー
-          content:
-            application/json:
-              example:
-                code: 500
-                message: Internal Server Error
 
     delete:
       summary: idで指定した店の情報を削除

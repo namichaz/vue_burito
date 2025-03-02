@@ -22,7 +22,7 @@
     </div>
   </header>
   <v-app>
-    <v-btn-toggle group v-model="selectedLang">
+    <v-btn-toggle group v-model="selectedLang" style="display: none">
       <v-btn
         :value="ELanguageType.JAJP"
         :class="{ 'inactive-btn': selectedLang !== ELanguageType.JAJP }"
@@ -241,17 +241,17 @@ const changeLanguage = (lang: ELanguageType) => {
   // 言語を変更
   storeLanguage.setLanguage(lang);
   const description = t("header.meta_description").toString();
-  document
-    .querySelector('meta[name="description"]')
-    ?.setAttribute("content", description);
-  const keywords = t("header.meta_keywords").toString();
-  document
-    .querySelector('meta[name="keywords"]')
-    ?.setAttribute("content", keywords);
-  document.title =
-    router.currentRoute.value.name === "top"
-      ? t("top.page_title").toString().split("&nbsp;").join(" ")
-      : t("common.page_title").toString().split("&nbsp;").join(" ");
+  // document
+  //   .querySelector('meta[name="description"]')
+  //   ?.setAttribute("content", description);
+  // const keywords = t("header.meta_keywords").toString();
+  // document
+  //   .querySelector('meta[name="keywords"]')
+  //   ?.setAttribute("content", keywords);
+  // document.title =
+  //   router.currentRoute.value.name === "top"
+  //     ? t("top.page_title").toString().split("&nbsp;").join(" ")
+  //     : t("common.page_title").toString().split("&nbsp;").join(" ");
 
   // 言語を反映させる
   locale.value = lang;

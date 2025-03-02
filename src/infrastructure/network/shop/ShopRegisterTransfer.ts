@@ -5,7 +5,6 @@ import ShopInfo from "@/domain/model/shop/ShopInfo";
 export default class ShopRegisterTransfer {
   public async registerShop(shopInfo: ShopInfo): Promise<void> {
     const params = {
-      shopId: shopInfo.shop.shop_id.toString(),
       shopName: shopInfo.shop.shop_name.toString(),
       prefecture: shopInfo.address.prefecture.toString(),
       city: shopInfo.address.city.toString(),
