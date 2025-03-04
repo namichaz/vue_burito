@@ -1,7 +1,9 @@
 {
-  "common": {},
+  "common": {
+    "loading": "読み込み中..."
+  },
   "howto": {
-    "page_title": "How To",
+    "page_title": "使い方",
     "description": "Where's my best burrito!?はあなただけの最高のブリトーを見つける為のサービスです！<br>美味しいブリトー屋さんを発見したら地図に登録してみんなにシェアしましょう！",
     "first_step": "1. お店を検索してみよう",
     "second_step": "2. 一覧でお店を調べよう",
@@ -11,11 +13,12 @@
     "third_step_description": "ページ下部の「Add」ボタンから、新しく見つけたお店を登録してみましょう。"
   },
   "post": {
-    "page_title_add": "Add New Shop",
-    "page_title_edit": "Edit Shop",
+    "page_title_add": "新しいお店の登録",
+    "page_title_edit": "お店の情報編集",
     "subtitle_shopName": "お店の名前",
     "subtitle_address": "住所",
     "subtitle_menu": "メニュー",
+    "current_addres_input": "現在地を入力",
     "prefecture": "都道府県",
     "city": "市区町村",
     "street": "番地",
@@ -42,7 +45,7 @@
     }
   },
   "list": {
-    "page_title": "Shop List",
+    "page_title": "お店一覧",
     "confirm_edit": "編集確認",
     "confirm_delete": "削除確認",
     "confirm_edit_description": "{shopName}の情報を編集しますか？",
@@ -56,7 +59,7 @@
     "delete_faild": "削除失敗"
   },
   "search": {
-    "page_title": "Search",
+    "page_title": "お店検索",
     "enter_keywords": "キーワードを入力",
     "cant_get_current_place": "現在地が取得できませんでした。",
     "please_enter_keywords": "検索キーワードを入力してください。",

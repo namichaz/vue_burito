@@ -22,7 +22,7 @@
     </div>
   </header>
   <v-app>
-    <v-btn-toggle group v-model="selectedLang" style="display: none">
+    <v-btn-toggle group v-model="selectedLang">
       <v-btn
         :value="ELanguageType.JAJP"
         :class="{ 'inactive-btn': selectedLang !== ELanguageType.JAJP }"
@@ -110,7 +110,7 @@ const showLoading = () => {
   storeLoading.start();
   loadingInstance = ElLoading.service({
     lock: true,
-    text: "読み込み中...",
+    text: t("common.loading").toString(),
     background: "rgba(0, 0, 0, 0.7)",
   });
 };
@@ -323,6 +323,9 @@ header {
   .v-btn {
     background-color: transparent;
     color: white;
+    &:hover {
+      transform: scale(1.1, 1.5);
+    }
   }
   .inactive-btn {
     color: rgba(0, 0, 0, 0.4) !important; /* 薄く表示 */

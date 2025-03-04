@@ -161,10 +161,10 @@ const navigateToMap = () => {
   height: 300px; /* 高さを調整 */
   margin: auto;
   transition: transform 0.5s ease;
-  /* cursor: pointer;
+  cursor: pointer;
   &:hover {
     transform: scale(1.1, 1.1);
-  } */
+  }
   @media (max-width: 400px) {
     max-width: 300px;
     font-size: 12px;

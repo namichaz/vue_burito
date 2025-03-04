@@ -1,5 +1,7 @@
 {
-  "common": {},
+  "common": {
+    "loading": "Loading..."
+  },
   "howto": {
     "page_title": "How to Use",
     "description": "Where's my best burrito!? is a service to help you find your perfect burrito! <br> Once you discover a delicious burrito shop, register it on the map and share it with everyone!",
@@ -16,6 +18,7 @@
     "subtitle_shopName": "Burrito Shop Name",
     "subtitle_address": "Address",
     "subtitle_menu": "Menu",
+    "current_addres_input": "Use current location",
     "prefecture": "Prefecture",
     "city": "City",
     "street": "Street",

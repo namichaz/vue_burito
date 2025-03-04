@@ -14,7 +14,13 @@
       />
     </div>
     <div class="inputArea">
-      <h3 v-html="t('post.subtitle_address')" />
+      <div class="buttonArea">
+        <h3 v-html="t('post.subtitle_address')" />
+        <v-btn
+          @click="inputCurrentAddress"
+          v-html="t('post.current_addres_input')"
+        />
+      </div>
       <v-select
         v-model="prefecture"
         :label="t('post.prefecture')"
@@ -74,6 +80,7 @@ import { computed, ref } from "vue";
 import { getMenuItems, MenuItem } from "@/domain/model/shop/MenuItem";
 import { useShopInfoStore } from "@/infrastructure/store/ShopInfoStore";
 import { useLanguageStore } from "@/infrastructure/store/LanguageStore";
+import { useMapInfoStore } from "@/infrastructure/store/MapInfoStore";
 import { Loader } from "@googlemaps/js-api-loader";
 import Shop from "@/domain/model/shop/Shop";
 import ShopInfo from "@/domain/model/shop/ShopInfo";
@@ -93,6 +100,7 @@ const longitude = ref(0);
 let location = { latitude: 0, longitude: 0 };
 const storeShopInfo = useShopInfoStore();
 const storeLanguage = useLanguageStore();
+const storeMapInfo = useMapInfoStore();
 const isPost = computed(() => storeShopInfo.isPost());
 const shopInfo = ref(ShopInfo.empty());
 const shopId = ref(
@@ -120,6 +128,7 @@ const isError = ref(false);
 const menuItems = getMenuItems();
 const shopRegisterTransfer = new ShopRegisterTransfer();
 const shopDeleteTransfer = new ShopDeleteTransfer();
+let map: google.maps.Map;
 
 const prefectures_ja = [
   "北海道",
@@ -390,6 +399,92 @@ const onSubmit = async () => {
     emit("hideLoading");
   }
 };
+
+const inputCurrentAddress = async () => {
+  emit("showLoading");
+  try {
+    const position: GeolocationPosition =
+      await storeMapInfo.getCurrentLocation();
+    const currentLatLng = new google.maps.LatLng(
+      position.coords.latitude,
+      position.coords.longitude
+    );
+
+    // Google Maps Geocoderのインスタンスを作成
+    const geocoder = new google.maps.Geocoder();
+
+    // 逆ジオコーディングのリクエストを実行
+    geocoder.geocode({ location: currentLatLng }, (results, status) => {
+      if (status === google.maps.GeocoderStatus.OK) {
+        if (results && results[0]) {
+          let currentPrefecture = "";
+          let currentCity = "";
+          let currentStreet = "";
+
+          // 住所コンポーネントをチェックして必要な情報を抽出
+          let streetParts: string[] = []; // 番地を組み合わせるための配列
+          let sublocalityParts: string[] = []; // 区名を格納する配列
+
+          results[0].address_components.forEach((component) => {
+            // 都道府県の取得
+            if (component.types.includes("administrative_area_level_1")) {
+              currentPrefecture = component.long_name;
+            }
+
+            // 市区町村の取得
+            if (component.types.includes("locality")) {
+              currentCity = component.long_name;
+            }
+
+            // 区名（sublocality_level_1）を取得
+            if (component.types.includes("sublocality_level_1")) {
+              sublocalityParts.push(component.long_name);
+            }
+
+            // streetの各部分を組み合わせ
+            if (component.types.includes("sublocality_level_2")) {
+              streetParts.push(component.long_name);
+            }
+            if (component.types.includes("sublocality_level_3")) {
+              streetParts.push(component.long_name);
+            }
+            if (component.types.includes("sublocality_level_4")) {
+              streetParts.push(component.long_name);
+            }
+            if (component.types.includes("premise")) {
+              streetParts.push(component.long_name);
+            }
+          });
+
+          // 市区町村名と区名を組み合わせ
+          currentCity = `${currentCity}${sublocalityParts}`.trim();
+
+          const streetPartsReverse = streetParts.reverse();
+          // streetPartsを結合してstreetを作成
+          currentStreet = `${streetPartsReverse[0]}${streetPartsReverse[1]}-${streetPartsReverse[2]}-${streetPartsReverse[3]}`;
+
+          // 全角数字を半角数字に変換
+          currentStreet = currentStreet.replace(/[０-９]/g, (ch) =>
+            String.fromCharCode(ch.charCodeAt(0) - 0xfee0)
+          );
+
+          // 結果をVueのdataにセット
+          cityName.value = currentCity;
+          streetName.value = currentStreet;
+          prefecture.value = currentPrefecture;
+          emit("hideLoading");
+        } else {
+          console.log("住所が見つかりませんでした");
+        }
+      } else {
+        console.log("ジオコーディングに失敗しました: " + status);
+      }
+    });
+  } catch (error) {
+    console.log("位置情報の取得に失敗しました: " + error);
+    emit("hideLoading");
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -409,6 +504,20 @@ const onSubmit = async () => {
     padding: 30px;
     display: grid;
     max-width: 400px;
+    .buttonArea {
+      display: flex;
+      position: relative;
+      padding: 5px;
+      .v-btn {
+        position: absolute;
+        right: 0;
+        top: 0;
+        background-color: lightgray;
+        &:hover {
+          opacity: 0.7;
+        }
+      }
+    }
     input {
       background-color: lightgray;
       width: 400px;
