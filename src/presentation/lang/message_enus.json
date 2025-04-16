@@ -18,7 +18,7 @@
     "subtitle_shopName": "Burrito Shop Name",
     "subtitle_address": "Address",
     "subtitle_menu": "Menu",
-    "current_addres_input": "Use current location",
+    "current_addres_input": "Input location",
     "prefecture": "Prefecture",
     "city": "City",
     "street": "Street",
@@ -64,6 +64,6 @@
     "cant_get_current_place": "We couldn't fetch your current location.",
     "please_enter_keywords": "Please enter search keywords.",
     "nothing_location": "No location found.",
-    "return_to_current_location": "Back to current location"
+    "return_to_current_location": "Back to location"
   }
 }

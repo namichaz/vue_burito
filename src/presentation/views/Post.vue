@@ -21,7 +21,7 @@
           v-html="t('post.current_addres_input')"
         />
       </div>
-      <v-select
+      <v-autocomplete
         v-model="prefecture"
         :label="t('post.prefecture')"
         :items="
@@ -32,7 +32,7 @@
         variant="solo-filled"
         density="compact"
         bg-color="lightgray"
-      ></v-select>
+      ></v-autocomplete>
       <input type="text" :placeholder="t('post.city')" v-model="cityName" />
       <input type="text" :placeholder="t('post.street')" v-model="streetName" />
     </div>
@@ -460,9 +460,11 @@ const inputCurrentAddress = async () => {
           currentCity = `${currentCity}${sublocalityParts}`.trim();
 
           const streetPartsReverse = streetParts.reverse();
-          // streetPartsを結合してstreetを作成
-          currentStreet = `${streetPartsReverse[0]}${streetPartsReverse[1]}-${streetPartsReverse[2]}-${streetPartsReverse[3]}`;
-
+          for (let i = 0; i < streetPartsReverse.length; i++) {
+            if (i === 3) currentStreet += "-";
+            if (i === 4) currentStreet += " ";
+            currentStreet += `${streetPartsReverse[i]}`;
+          }
           // 全角数字を半角数字に変換
           currentStreet = currentStreet.replace(/[０-９]/g, (ch) =>
             String.fromCharCode(ch.charCodeAt(0) - 0xfee0)
@@ -482,6 +484,7 @@ const inputCurrentAddress = async () => {
     });
   } catch (error) {
     console.log("位置情報の取得に失敗しました: " + error);
+    window.alert("位置情報の取得に失敗しました: " + error);
     emit("hideLoading");
   }
 };

@@ -42,6 +42,9 @@
       <v-col id="editIcon">
         <div class="icon pin" @click="navigateToMap"></div>
       </v-col>
+      <v-col id="editIcon">
+        <div class="icon info" @click="navigateToMap"></div>
+      </v-col>
     </v-row>
   </v-card>
 </template>
@@ -177,8 +180,8 @@ const navigateToMap = () => {
     top: 15px;
     left: 10px;
     .icon {
-      width: 30px;
-      height: 30px;
+      width: 23px;
+      height: 23px;
       cursor: pointer;
       position: relative;
       &:hover {
@@ -191,7 +194,7 @@ const navigateToMap = () => {
     .delete {
       background-image: url("@/presentation/assets/trash.svg");
       position: absolute;
-      right: -5px;
+      right: 5px;
     }
   }
   .v-card-title {
@@ -242,8 +245,8 @@ const navigateToMap = () => {
     bottom: 8px;
     left: 5px;
     .icon {
-      width: 30px;
-      height: 30px;
+      width: 25px;
+      height: 25px;
       cursor: pointer;
       position: relative;
       &:hover {
@@ -252,6 +255,13 @@ const navigateToMap = () => {
     }
     .pin {
       background-image: url("@/presentation/assets/pin.svg");
+      width: 30px;
+      height: 30px;
+    }
+    .info {
+      background-image: url("@/presentation/assets/info.svg");
+      position: absolute;
+      right: -275px;
     }
   }
 }

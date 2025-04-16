@@ -98,8 +98,6 @@ const moveToCurrentLocation = async () => {
 //TODO 登録されてるお店のマーカー用の緯度経度情報作る関数
 const buildMarkerData = async () => {
   shopInfos.value = await storeShopInfo.getShopInfos();
-  console.log("pppppppp=", storeShopInfo.getShopInfos());
-  console.log("wwwwwww=", shopInfos.value);
   for (var shopInfo of shopInfos.value) {
     let param = {
       lat: shopInfo.address.longitude,
